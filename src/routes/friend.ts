@@ -2,9 +2,19 @@
  * Express Router middeware for Friend APIs
  *
  * @author Hyecheol (Jerry) Jang
+ * @author Jeonghyeon Park  <fishbox0923@gmail.com>
  */
 
 import * as express from 'express';
+import * as Cosmos from '@azure/cosmos';
+import {Buffer} from 'node:buffer';
+import AuthToken from '../datatypes/Token/AuthToken';
+import ForbiddenError from '../exceptions/ForbiddenError';
+import UnauthenticatedError from '../exceptions/UnauthenticatedError';
+import verifyAccessToken from '../functions/JWT/verifyAccessToken';
+import {validateEmail} from '../functions/inputValidator/validateEmail';
+import FriendRequest from '../datatypes/Friend/FriendRequest';
+import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -25,9 +35,45 @@ const friendRouter = express.Router();
 // });
 
 // GET: /friend/request/received
-// friendRouter.get('/request/received', async (req, res, next) => {
-//   // TODO;
-// });
+friendRouter.get('/request/received', async (req, res, next) => {
+    const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+    try {
+        // Check Origin header or application key
+        if (
+            req.header('Origin') !== req.app.get('webpageOrigin') &&
+            !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+        ) {
+          throw new ForbiddenError();
+        }
+
+        // Check access token
+        let tokenContents: AuthToken | undefined = undefined;
+        const accessToken = req.header('X-ACCESS-TOKEN');
+        if (accessToken !== undefined) {
+            tokenContents = verifyAccessToken(
+            accessToken,
+            req.app.get('jwtAccessKey')
+        );
+        } else {
+        throw new UnauthenticatedError();
+        }
+        // DB Operation - get list of received friend requests
+        const email = tokenContents.id;
+        const receivedRequest = await FriendRequest.read(dbClient, email);
+
+        // response
+        // TODO - need to make it as a list
+        const resObj: FriendRequestGetResponseObj = {
+            id: receivedRequest.id,
+            from: receivedRequest.from,
+        };
+        res.status(200).json(resObj);
+    }
+    catch(e) {
+        next(e);
+    }
+});
 
 // DELETE: /friend/request/received/{friendRequestId}
 // friendRouter.delete(
