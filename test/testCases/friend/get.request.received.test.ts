@@ -8,10 +8,11 @@
 // eslint-disable-next-line node/no-unpublished-import
 import * as request from 'supertest';
 import * as jwt from 'jsonwebtoken';
-import * as Cosmos from '@azure/cosmos';
 import TestEnv from '../../TestEnv';
 import ExpressServer from '../../../src/ExpressServer';
 import AuthToken from '../../../src/datatypes/Token/AuthToken';
+
+const FRIENDREQUEST = 'friendRequest';
 
 describe('GET /friend/request/received - Get Received Friend Requests', () => {
   let testEnv: TestEnv;
@@ -33,7 +34,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     // Create Access Token
     // Valid Access Token
     let tokenContent: AuthToken = {
-      id: 'user@wisc.edu',
+      id: 'steve@wisc.edu',
       type: 'access',
       tokenType: 'user',
     };
@@ -169,14 +170,28 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Success', async() =>{
+  test('Success', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    //request without any origin or app
+    //request
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('friendRequests');
+    expect(response.body.friendRequests[0]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[0]).toHaveProperty('from');
+    expect(response.body.friendRequests[1]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[1]).toHaveProperty('from');
+    expect(response.body.friendRequests[2]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[2]).toHaveProperty('from');
+    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ikj');
+    expect(response.body.friendRequests[0].from).toBe('random@wisc.edu');
+    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fdsa');
+    expect(response.body.friendRequests[1].from).toBe('tedpowel123@wisc.edu');
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fdsa');
+    expect(response.body.friendRequests[2].from).toBe('dalcmap@wisc.edu');
+
   });
 });

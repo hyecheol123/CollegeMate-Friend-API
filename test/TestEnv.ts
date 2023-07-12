@@ -8,12 +8,14 @@
  *  - Remove used table and close database connection from the express server
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Jeonghyeon Park <fishbox0923@gmail.com>
  */
 
 import * as crypto from 'crypto';
 import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
+import FriendRequest from '../src/datatypes/Friend/FriendRequest';
 
 /**
  * Class for Test Environment
@@ -100,7 +102,34 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // TODO: Create a new friend request entry
+    // Create a new friend request entry
+    const friendRequestSample: FriendRequest[] = [];
+    friendRequestSample.push(
+      {
+        requestId: 'sadf989hvsad93ikj',
+        from: 'random@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        requestId: 'adsjbzvxn91fdsa',
+        from: 'tedpowel123@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        requestId: 'adsjbzvxn91fdsa',
+        from: 'dalcmap@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      }
+    );
+
+    for (let index = 0; index < friendRequestSample.length; index++) {
+      await this.dbClient
+        .container('friendRequest')
+        .items.create(friendRequestSample[index]);
+    }
 
     // Setup Express Server
     this.expressServer = new ExpressServer(this.testConfig);

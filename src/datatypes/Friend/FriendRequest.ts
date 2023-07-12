@@ -9,16 +9,16 @@ import * as Cosmos from '@azure/cosmos';
 // import FriendRequestItem from './FriendRequestItem';
 // import FriendRequestGetResponseObj from './FriendRequestGetResponseObj';
 
-const FRIENDREQUEST = 'friendrequest';
+const FRIENDREQUEST = 'friendRequest';
 
 export default class FriendRequest {
-  id: string;
+  requestId: string;
   from: string;
   to: string;
   createdAt: Date | string;
 
   constructor(id: string, from: string, to: string, createdAt: Date) {
-    this.id = id;
+    this.requestId = id;
     this.from = from;
     this.to = to;
     this.createdAt = createdAt;
@@ -39,14 +39,47 @@ export default class FriendRequest {
     to: string
   ): Promise<FriendRequest[]> {
     const friendRequests: FriendRequest[] = [];
-    const dbOps = await dbClient.container(FRIENDREQUEST).item(to).read();
 
-    for (const item of dbOps.resource) {
-      friendRequests.push(
-        new FriendRequest(item.id, item.from, item.to, item.createdAt)
-      );
+    // friendRequests.concat(
+    //   (
+    //     await dbClient
+    //       .container(FRIENDREQUEST)
+    //       .items.query({
+    //         query: 'select * from friendRequest p where p.to=@to',
+    //         parameters: [
+    //           {
+    //             name: '@to',
+    //             value: 'steve@wisc.edu'
+    //           },
+    //         ],
+    //       })
+    //       .fetchAll()
+    //   ).resources
+    // );
+    // console.log(friendRequests);
+    const querySpec = {
+      query: `SELECT f.requestId, f['from'], f['to'], f.createdAt FROM ${FRIENDREQUEST} f WHERE f['to']=@to`,
+      parameters: [
+        {
+          name: '@to',
+          value: to,
+        },
+      ],
+    };
+    const dbOps = await dbClient
+      .container(FRIENDREQUEST)
+      .items.query(querySpec)
+      .fetchAll();
+    // console.log(dbOps.resources);
+    for (const item of dbOps.resources) {
+      friendRequests.push(item);
     }
-
+    // console.log(friendRequests);
+    // for (const item of dbOps.resource) {
+    //   friendRequests.push(
+    //     new FriendRequest(item.id, item.from, item.to, item.createdAt)
+    //   );
+    // }
     return friendRequests;
   }
 }
