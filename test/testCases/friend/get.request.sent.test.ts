@@ -20,6 +20,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     refresh: '',
     expired: '',
     admin: '',
+    invalidId: '',
   };
 
   beforeEach(async () => {
@@ -84,6 +85,19 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
       tokenContent,
       testEnv.testConfig.jwt.secretKey,
       {algorithm: 'HS512', expiresIn: '1ms'}
+    );
+
+    // Valid Access Token
+    tokenContent = {
+      id: 'invalidId',
+      type: 'access',
+      tokenType: 'user',
+    };
+    // Generate AccessToken
+    accessTokenMap.invalidId = jwt.sign(
+      tokenContent,
+      testEnv.testConfig.jwt.secretKey,
+      {algorithm: 'HS512', expiresIn: '10m'}
     );
   });
 
@@ -164,6 +178,17 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({'X-APPLICATION-KEY': 'wrongAppKey'});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+  });
+
+  test('Fail - Token includes invalid Id', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    const response = await request(testEnv.expressServer.app)
+      .get('/friend/request/sent')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.invalidId})
+      .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(403);
     expect(response.body.error).toBe('Forbidden');
   });

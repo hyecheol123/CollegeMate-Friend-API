@@ -126,10 +126,13 @@ friendRouter.get('/request/sent', async (req, res, next) => {
         accessToken,
         req.app.get('jwtAccessKey')
       );
+      // Check if the token is associated with the user email from the request body
+      if (!tokenContents.id.includes('@wisc.edu')) {
+        throw new ForbiddenError();
+      }
     } else {
       throw new UnauthenticatedError();
     }
-    
     // DB Operation - get list of received friend requests
     const email = tokenContents.id;
 
