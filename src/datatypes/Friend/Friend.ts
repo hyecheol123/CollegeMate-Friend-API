@@ -4,7 +4,6 @@
  * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 import * as Cosmos from '@azure/cosmos';
-import FriendListItem from './FriendListItem';
 
 const FRIEND = 'friend';
 
@@ -26,8 +25,6 @@ export default class Friend {
     this.since = since;
   }
 
-  // TODO - figure out what is the best way to retrieve friend list
-
   /**
    * Get list of all friends of a user
    *
@@ -37,32 +34,17 @@ export default class Friend {
   static async read(
     dbClient: Cosmos.Database,
     email: string
-  ): Promise<FriendListItem[]> {
-    const friendList: FriendListItem[] = [];
-    // Query that returns all friends of a user
-    friendList.concat(
-      (
-        await dbClient
-          .container(FRIEND)
-          .items.query<FriendListItem>({
-            query: `SELECT f.email1 AS email, f.since FROM ${FRIEND} f WHERE f.email2 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: email,
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources
-    );
+  ): Promise<string[]> {
+    let friendList: string[] = [];
+    type FriendInfo = {email: string};
 
-    friendList.concat(
+    // Query that returns all friends of a user
+    friendList = friendList.concat(
       (
         await dbClient
           .container(FRIEND)
-          .items.query<FriendListItem>({
-            query: `SELECT f.email2 AS email, f.since FROM ${FRIEND} f WHERE f.email1 = @email`,
+          .items.query<FriendInfo>({
+            query: `SELECT f.email1 AS email FROM ${FRIEND} f WHERE f.email2 = @email`,
             parameters: [
               {
                 name: '@email',
@@ -71,7 +53,23 @@ export default class Friend {
             ],
           })
           .fetchAll()
-      ).resources
+      ).resources.map(friend => friend.email)
+    );
+    friendList = friendList.concat(
+      (
+        await dbClient
+          .container(FRIEND)
+          .items.query<FriendInfo>({
+            query: `SELECT f.email2 AS email FROM ${FRIEND} f WHERE f.email1 = @email`,
+            parameters: [
+              {
+                name: '@email',
+                value: email,
+              },
+            ],
+          })
+          .fetchAll()
+      ).resources.map(friend => friend.email)
     );
 
     return friendList;
