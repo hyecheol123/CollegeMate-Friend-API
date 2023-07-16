@@ -100,6 +100,58 @@ describe('GET /friend - Friend List', () => {
     await testEnv.stop();
   });
 
+  test('Fail - Neither from Origin nor App', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Request from wrong origin
+    let response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.steve})
+      .set({Origin: 'https://wrongaddress.app'});
+    expect(response.status).toBe(403);
+
+    // Request from wrong app
+    response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.steve})
+      .set({'X-APPLICATION-KEY': '<Android-App-v2>'});
+    expect(response.status).toBe(403);
+
+    // Request from no origin
+    response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.steve});
+    expect(response.status).toBe(403);
+  });
+
+  test('Fail - No Access Token', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Request from no origin
+    const response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(401);
+  });
+
+  test('Fail - Wrong Access Token', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Request with expired access token
+    let response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.expired})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(403);
+
+    // Request with wrong access token
+    response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.wrong})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(403);
+  });
+
   test('Success', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
     testEnv.dbClient = testEnv.dbClient as Cosmos.Database;
