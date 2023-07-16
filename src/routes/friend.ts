@@ -56,19 +56,7 @@ friendRouter.get('/request/received', async (req, res, next) => {
     } else {
       throw new UnauthenticatedError();
     }
-
-    // DB Operation - get list of received friend requests
-    // const email = tokenContents.id;
-    // const receivedRequest = await FriendRequest.read(dbClient, email);
-    // // const friendsList: FriendRequestGetResponseObj[] = [];
-    // // response
-    // // TODO - need to make it as a list
-    // const resObj: FriendRequestGetResponseObj = {
-    //     id: receivedRequest.id,
-    //     from: receivedRequest.from,
-    // };
-    // res.status(200).json(resObj);
-
+    
     // DB Operation - get list of received friend requests
     const email = tokenContents.id;
     const receivedRequests: FriendRequest[] = await FriendRequest.read(
