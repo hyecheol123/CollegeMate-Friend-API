@@ -86,8 +86,8 @@ export default class TestEnv {
     const friendSample: Friend[] = [];
     friendSample.push(
       {
-        email1: 'steve@wisc.edu',
-        email2: 'jeonghyeon@wisc.edu',
+        email1: 'jeonghyeon@wisc.edu',
+        email2: 'steve@wisc.edu',
         since: new Date(),
       },
       {
@@ -101,8 +101,8 @@ export default class TestEnv {
         since: new Date(),
       },
       {
-        email1: 'steve@wisc.edu',
-        email2: 'daekyun@wisc.edu',
+        email1: 'daekyun@wisc.edu',
+        email2: 'steve@wisc.edu',
         since: new Date(),
       }
     );
