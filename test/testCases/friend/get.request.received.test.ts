@@ -12,8 +12,6 @@ import TestEnv from '../../TestEnv';
 import ExpressServer from '../../../src/ExpressServer';
 import AuthToken from '../../../src/datatypes/Token/AuthToken';
 
-const FRIENDREQUEST = 'friendRequest';
-
 describe('GET /friend/request/received - Get Received Friend Requests', () => {
   let testEnv: TestEnv;
 
@@ -192,6 +190,5 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.body.friendRequests[1].from).toBe('tedpowel123@wisc.edu');
     expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fdsa');
     expect(response.body.friendRequests[2].from).toBe('dalcmap@wisc.edu');
-
   });
 });
