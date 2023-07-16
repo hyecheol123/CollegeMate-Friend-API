@@ -127,7 +127,7 @@ describe('GET /friend - Friend List', () => {
   test('Fail - No Access Token', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    // Request from no origin
+    // Request from no access token
     const response = await request(testEnv.expressServer.app)
       .get('/friend')
       .set({Origin: 'https://collegemate.app'});
@@ -138,6 +138,9 @@ describe('GET /friend - Friend List', () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     // Request with expired access token
+    // Wait for 5 ms
+    await new Promise(resolve => setTimeout(resolve, 5));
+
     let response = await request(testEnv.expressServer.app)
       .get('/friend')
       .set({'X-ACCESS-TOKEN': accessTokenMap.expired})
