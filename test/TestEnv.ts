@@ -8,12 +8,14 @@
  *  - Remove used table and close database connection from the express server
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 import * as crypto from 'crypto';
 import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
+import Friend from '../src/datatypes/Friend/Friend';
 
 /**
  * Class for Test Environment
@@ -80,7 +82,34 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // TODO: Create a new friend entry
+    // Create a new friend entries
+    const friendSample: Friend[] = [];
+    friendSample.push(
+      {
+        email1: 'steve@wisc.edu',
+        email2: 'jeonghyeon@wisc.edu',
+        since: new Date(),
+      },
+      {
+        email1: 'drag@wisc.edu',
+        email2: 'jerry@wisc.edu',
+        since: new Date(),
+      },
+      {
+        email1: 'jerry@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date(),
+      },
+      {
+        email1: 'steve@wisc.edu',
+        email2: 'daekyun@wisc.edu',
+        since: new Date(),
+      }
+    );
+
+    for (let index = 0; index < friendSample.length; index++) {
+      await this.dbClient.container('friend').items.create(friendSample[index]);
+    }
 
     // friend request container
     containerOps = await this.dbClient.containers.create({

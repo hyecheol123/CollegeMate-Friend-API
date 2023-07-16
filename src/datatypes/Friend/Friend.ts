@@ -4,6 +4,7 @@
  * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 import * as Cosmos from '@azure/cosmos';
+import NotFoundError from '../../exceptions/NotFoundError';
 
 const FRIEND = 'friend';
 
@@ -37,10 +38,19 @@ export default class Friend {
     email1: string,
     email2: string
   ): Promise<void> {
+    const temp = email1;
+    email1 = email1 < email2 ? email1 : email2;
+    email2 = temp < email2 ? email2 : temp;
     // Delete Friend Relationship
-    await dbClient
-      .container(FRIEND)
-      .item(email1 + email2)
-      .delete();
+    try {
+      // TODO: use composite key
+      await dbClient.container(FRIEND).
+    } catch (e) {
+      if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
+        throw new NotFoundError();
+      } else {
+        throw e;
+      }
+    }
   }
 }

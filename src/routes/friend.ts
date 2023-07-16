@@ -55,19 +55,11 @@ friendRouter.delete('/:base64Email', async (req, res, next) => {
       throw new NotFoundError();
     }
 
-    // Check if access token has the same email as the request body
-    if (tokenContents.id !== requestUserEmail) {
-      throw new ForbiddenError();
-    }
-
     // DB Operation - delete requested friend
     const email = tokenContents.id;
-    // Send delete request with emails alphabetically ordered
-    if (email > requestUserEmail) {
-      await Friend.delete(dbClient, requestUserEmail, email);
-    } else {
-      await Friend.delete(dbClient, email, requestUserEmail);
-    }
+    console.log(email, requestUserEmail);
+    console.log(email > requestUserEmail);
+    await Friend.delete(dbClient, email, requestUserEmail);
 
     res.status(200).send();
   } catch (e) {
