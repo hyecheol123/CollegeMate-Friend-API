@@ -59,7 +59,7 @@ friendRouter.get('/request/received', async (req, res, next) => {
 
     // DB Operation - get list of received friend requests
     const email = tokenContents.id;
-    const receivedRequests: FriendRequest[] = await FriendRequest.read(
+    const receivedRequests: FriendRequest[] = await FriendRequest.readReceived(
       dbClient,
       email
     );
