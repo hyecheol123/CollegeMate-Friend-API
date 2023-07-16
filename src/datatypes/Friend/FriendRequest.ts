@@ -21,7 +21,7 @@ export default class FriendRequest {
     this.createdAt = createdAt;
   }
 
-  static async readFrom(
+  static async readSent(
     dbClient: Cosmos.Database,
     from: string
   ): Promise<FriendRequest[]> {
