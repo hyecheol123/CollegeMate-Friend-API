@@ -34,59 +34,7 @@ const friendRouter = express.Router();
 
 // GET: /friend/request/received
 // friendRouter.get('/request/received', async (req, res, next) => {
-//   const dbClient: Cosmos.Database = req.app.locals.dbClient;
-
-//   try {
-//     // Check Origin header or application key
-//     if (
-//       req.header('Origin') !== req.app.get('webpageOrigin') &&
-//       !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
-//     ) {
-//       throw new ForbiddenError();
-//     }
-
-//     // Check access token
-//     let tokenContents: AuthToken | undefined = undefined;
-//     const accessToken = req.header('X-ACCESS-TOKEN');
-//     if (accessToken !== undefined) {
-//       tokenContents = verifyAccessToken(
-//         accessToken,
-//         req.app.get('jwtAccessKey')
-//       );
-//     } else {
-//       throw new UnauthenticatedError();
-//     }
-
-//     // DB Operation - get list of received friend requests
-//     // const email = tokenContents.id;
-//     // const receivedRequest = await FriendRequest.read(dbClient, email);
-//     // // const friendsList: FriendRequestGetResponseObj[] = [];
-//     // // response
-//     // // TODO - need to make it as a list
-//     // const resObj: FriendRequestGetResponseObj = {
-//     //     id: receivedRequest.id,
-//     //     from: receivedRequest.from,
-//     // };
-//     // res.status(200).json(resObj);
-
-//     // DB Operation - get list of received friend requests
-//     const email = tokenContents.id;
-//     const receivedRequests: FriendRequest[] = await FriendRequest.readTo(
-//       dbClient,
-//       email
-//     );
-
-//     // Build response object
-//     const friendRequests: FriendRequestGetResponseObj[] = receivedRequests.map(
-//       request => ({
-//         requestId: request.requestId,
-//         from: request.from,
-//       })
-//     );
-//     res.status(200).json({friendRequests});
-//   } catch (e) {
-//     next(e);
-//   }
+//   // TODO;
 // });
 
 // DELETE: /friend/request/received/{friendRequestId}

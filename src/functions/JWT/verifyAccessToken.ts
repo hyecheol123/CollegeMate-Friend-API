@@ -1,7 +1,7 @@
 /**
- * Verifying Access Token (JSON Web Token)
- *
+ * Verifying Access Token (JSON Web Token)*
  * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
+ *
  */
 
 import * as jwt from 'jsonwebtoken';
@@ -9,20 +9,20 @@ import AuthToken, {JWTObject} from '../../datatypes/Token/AuthToken';
 import ForbiddenError from '../../exceptions/ForbiddenError';
 
 /**
- * Method to verify AccessToken
- *
- * @param {string} accessToken JWT accessToken
- * @param {string} jwtAccessKey JWT access secret
- * @return {AuthToken} authentication token content
- */
-export default function verifyServerAdminToken(
-  serverAdminToken: string,
+  * Method to verify AccessToken*
+  @param {string} accessToken JWT accessToken
+  @param {string} jwtAccessKey JWT access secret
+  @return {AuthToken} authentication token conten
+  */
+
+export default function verifyAccessToken(
+  accessToken: string,
   jwtAccessKey: string
 ): AuthToken {
   let tokenContents: JWTObject;
   try {
     // Check token's validity and contents
-    tokenContents = jwt.verify(serverAdminToken, jwtAccessKey, {
+    tokenContents = jwt.verify(accessToken, jwtAccessKey, {
       algorithms: ['HS512'],
     }) as JWTObject;
   } catch (e) {
