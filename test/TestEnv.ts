@@ -8,6 +8,7 @@
  *  - Remove used table and close database connection from the express server
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 import * as crypto from 'crypto';
@@ -85,21 +86,41 @@ export default class TestEnv {
     const friendSample: Friend[] = [];
     friendSample.push(
       {
+        id: TestConfig.hash(
+          'jeonghyeon@wisc.edu/steve@wisc.edu',
+          'jeonghyeon@wisc.edu',
+          'steve@wisc.edu'
+        ),
         email1: 'jeonghyeon@wisc.edu',
         email2: 'steve@wisc.edu',
         since: new Date(),
       },
       {
+        id: TestConfig.hash(
+          'drag@wisc.edu/jerry@wisc.edu',
+          'drag@wisc.edu',
+          'jerry@wisc.edu'
+        ),
         email1: 'drag@wisc.edu',
         email2: 'jerry@wisc.edu',
         since: new Date(),
       },
       {
+        id: TestConfig.hash(
+          'jerry@wisc.edu/steve@wisc.edu',
+          'jerry@wisc.edu',
+          'steve@wisc.edu'
+        ),
         email1: 'jerry@wisc.edu',
         email2: 'steve@wisc.edu',
         since: new Date(),
       },
       {
+        id: TestConfig.hash(
+          'daekyun@wisc.edu/steve@wisc.edu',
+          'daekyun@wisc.edu',
+          'steve@wisc.edu'
+        ),
         email1: 'daekyun@wisc.edu',
         email2: 'steve@wisc.edu',
         since: new Date(),
