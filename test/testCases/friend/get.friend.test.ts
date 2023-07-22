@@ -109,6 +109,7 @@ describe('GET /friend - Friend List', () => {
       .set({'X-ACCESS-TOKEN': accessTokenMap.steve})
       .set({Origin: 'https://wrongaddress.app'});
     expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
 
     // Request from wrong app
     response = await request(testEnv.expressServer.app)
@@ -116,12 +117,14 @@ describe('GET /friend - Friend List', () => {
       .set({'X-ACCESS-TOKEN': accessTokenMap.steve})
       .set({'X-APPLICATION-KEY': '<Android-App-v2>'});
     expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
 
     // Request from no origin
     response = await request(testEnv.expressServer.app)
       .get('/friend')
       .set({'X-ACCESS-TOKEN': accessTokenMap.steve});
     expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
   });
 
   test('Fail - No Access Token', async () => {
@@ -132,6 +135,7 @@ describe('GET /friend - Friend List', () => {
       .get('/friend')
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(401);
+    expect(response.body.error).toBe('Unauthenticated');
   });
 
   test('Fail - Wrong Access Token', async () => {
@@ -146,6 +150,7 @@ describe('GET /friend - Friend List', () => {
       .set({'X-ACCESS-TOKEN': accessTokenMap.expired})
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
 
     // Request with wrong access token
     response = await request(testEnv.expressServer.app)
@@ -153,6 +158,7 @@ describe('GET /friend - Friend List', () => {
       .set({'X-ACCESS-TOKEN': accessTokenMap.wrong})
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
   });
 
   test('Success', async () => {
