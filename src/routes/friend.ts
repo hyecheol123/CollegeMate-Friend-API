@@ -57,8 +57,6 @@ friendRouter.delete('/:base64Email', async (req, res, next) => {
 
     // DB Operation - delete requested friend
     const email = tokenContents.id;
-    console.log(email, requestUserEmail);
-    console.log(email > requestUserEmail);
     await Friend.delete(dbClient, email, requestUserEmail);
 
     res.status(200).send();

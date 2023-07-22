@@ -1,5 +1,5 @@
 /**
- * Jest unit test for GET /friend method
+ * Jest unit test for DELETE /friend/{base64Email}
  *
  * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
@@ -13,7 +13,7 @@ import ExpressServer from '../../../src/ExpressServer';
 import AuthToken from '../../../src/datatypes/Token/AuthToken';
 
 const FRIEND = 'friend';
-describe('GET /friend - Friend List', () => {
+describe('DELETE /friend/{base64Email} - Unfriend', () => {
   let testEnv: TestEnv;
   const encodedEmailMap = {
     steve: Buffer.from('steve@wisc.edu', 'utf8').toString('base64url'),
@@ -183,7 +183,7 @@ describe('GET /friend - Friend List', () => {
             parameters: [
               {
                 name: '@email',
-                value: 'steve@wisc.edu',
+                value: 'jerry@wisc.edu',
               },
             ],
           })
@@ -199,7 +199,7 @@ describe('GET /friend - Friend List', () => {
             parameters: [
               {
                 name: '@email',
-                value: 'steve@wisc.edu',
+                value: 'jerry@wisc.edu',
               },
             ],
           })
@@ -207,7 +207,7 @@ describe('GET /friend - Friend List', () => {
       ).resources.map(friend => friend.email)
     );
 
-    expect(friendList).toHaveLength(2);
+    expect(friendList).toHaveLength(1);
     expect(friendList).toContain('steve@wisc.edu');
     expect(friendList).not.toContain('daekyun@wisc.edu');
     expect(friendList).not.toContain('jeonghyeon@wisc.edu');
