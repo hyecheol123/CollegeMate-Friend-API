@@ -5,10 +5,12 @@
  */
 import * as Cosmos from '@azure/cosmos';
 import NotFoundError from '../../exceptions/NotFoundError';
+import ServerConfig from '../../ServerConfig';
 
 const FRIEND = 'friend';
 
 export default class Friend {
+  id: string;
   email1: string;
   email2: string;
   since: Date | string;
@@ -21,6 +23,7 @@ export default class Friend {
    * @param since date of friendship
    */
   constructor(email1: string, email2: string, since: Date | string) {
+    this.id = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
     this.email1 = email1 < email2 ? email1 : email2;
     this.email2 = email1 < email2 ? email2 : email1;
     this.since = since;
@@ -41,10 +44,12 @@ export default class Friend {
     const temp = email1;
     email1 = email1 < email2 ? email1 : email2;
     email2 = temp < email2 ? email2 : temp;
+
+    const id = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
     // Delete Friend Relationship
     try {
       // TODO: use composite key
-      await dbClient.container(FRIEND).
+      await dbClient.container(FRIEND).item(id).delete();
     } catch (e) {
       if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
         throw new NotFoundError();
