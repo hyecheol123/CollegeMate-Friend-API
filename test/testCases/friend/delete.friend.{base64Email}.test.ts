@@ -110,7 +110,98 @@ describe('DELETE /friend/{base64Email} - Unfriend', () => {
     await testEnv.stop();
   });
 
-  test('Fail - Wrong Access Token', async () => {});
+  test('Fail - Neither from Origin or App', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Wrong Origin
+    let response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.wrong})
+      .set({Origin: 'https://suspicious.app'});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+
+    // Wrong App Version
+    response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.wrong})
+      .set({'X-APPLICATION-KEY': '<Android-App-v2>'});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+
+    // No Origin
+    response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.wrong});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+  });
+
+  test('Fail - No Access Token', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // No Access Token
+    const response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe('Unauthenticated');
+  });
+
+  test('Fail - Wrong Access Token', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Wrong Access Token
+    let response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.wrong})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+
+    // Expired Access Token
+    response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.expired})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+  });
+
+  test('Fail - Wrong Parameter', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Wrong parameter type
+    const response = await request(testEnv.expressServer.app)
+      .delete('/friend/notemail')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.steve})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+  });
+
+  test('Fail - Friend Relation Not Found', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Non-existent friend relation
+    let response = await request(testEnv.expressServer.app)
+      .delete(`/friend/${encodedEmailMap.jeonghyeon}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.jerry})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+
+    response = await request(testEnv.expressServer.app)
+      .delete(
+        `/friend/${Buffer.from('whoisthisuser@wisc.edu', 'utf8').toString(
+          'base64url'
+        )}`
+      )
+      .set({'X-ACCESS-TOKEN': accessTokenMap.steve})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+  });
 
   test('Success', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;

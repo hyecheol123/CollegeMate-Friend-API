@@ -48,11 +48,10 @@ export default class Friend {
     const temp = email1;
     email1 = email1 < email2 ? email1 : email2;
     email2 = temp < email2 ? email2 : temp;
-
     const id = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
+
     // Delete Friend Relationship
     try {
-      // TODO: use composite key
       await dbClient.container(FRIEND).item(id).delete();
     } catch (e) {
       if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
