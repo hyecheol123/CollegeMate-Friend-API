@@ -21,7 +21,7 @@ export default class Friend {
    * @param email2 email of user 2
    * @param since date of friendship
    */
-  constructor(email1: string, email2: string, since: Date | string) {
+  constructor(email1: string, email2: string, since: Date) {
     this.email1 = email1 < email2 ? email1 : email2;
     this.email2 = email1 < email2 ? email2 : email1;
     this.id = ServerConfig.hash(
