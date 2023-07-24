@@ -192,7 +192,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.body.friendRequests[0].from).toBe('random@wisc.edu');
     expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fdsa');
     expect(response.body.friendRequests[1].from).toBe('tedpowel123@wisc.edu');
-    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds');  //NEED TO BE FIXED WHEN API DOC IS UPDATED
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds'); //NEED TO BE FIXED WHEN API DOC IS UPDATED
     expect(response.body.friendRequests[2].from).toBe('dalcmap@wisc.edu');
     expect(response.body.friendRequests[0]).not.toHaveProperty('to');
     expect(response.body.friendRequests[1]).not.toHaveProperty('to');
