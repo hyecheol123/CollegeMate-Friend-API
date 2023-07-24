@@ -20,9 +20,9 @@ const friendRouter = express.Router();
 // });
 
 // POST: /friend/request
-// friendRouter.post('/request', async (req, res, next) => {
-//   // TODO;
-// });
+friendRouter.post('/request', async (req, res, next) => {
+    
+});
 
 // GET: /friend/request/received
 // friendRouter.get('/request/received', async (req, res, next) => {
