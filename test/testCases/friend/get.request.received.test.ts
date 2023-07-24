@@ -94,7 +94,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
   test('Fail - No Access Token', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    //reqeust
+    // reqeust without a token
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({Origin: 'https://collegemate.app'});
@@ -108,6 +108,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     // Wait for 5 ms
     await new Promise(resolve => setTimeout(resolve, 5));
 
+    // request with an expired access token
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.expired})
@@ -119,6 +120,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
   test('Fail - Wrong Token', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
+    // reqeust with admin token
     let response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.admin})
@@ -126,6 +128,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.status).toBe(403);
     expect(response.body.error).toBe('Forbidden');
 
+    // request with refresh token
     response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.refresh})
@@ -133,6 +136,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.status).toBe(403);
     expect(response.body.error).toBe('Forbidden');
 
+    // request with "wrong" token
     response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': 'wrong'})
@@ -144,14 +148,14 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
   test('Fail - Not from Origin nor App', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    //request without any origin or app
+    // request without any origin or app
     let response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid});
     expect(response.status).toBe(403);
     expect(response.body.error).toBe('Forbidden');
 
-    //request without from wrong origin and not app
+    // request without from wrong origin and not app
     response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
@@ -171,7 +175,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
   test('Success', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    //request
+    // valid request
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/received')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
@@ -188,7 +192,10 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.body.friendRequests[0].from).toBe('random@wisc.edu');
     expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fdsa');
     expect(response.body.friendRequests[1].from).toBe('tedpowel123@wisc.edu');
-    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fdsa');
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds');  //NEED TO BE FIXED WHEN API DOC IS UPDATED
     expect(response.body.friendRequests[2].from).toBe('dalcmap@wisc.edu');
+    expect(response.body.friendRequests[0]).not.toHaveProperty('to');
+    expect(response.body.friendRequests[1]).not.toHaveProperty('to');
+    expect(response.body.friendRequests[2]).not.toHaveProperty('to');
   });
 });

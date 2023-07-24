@@ -67,7 +67,7 @@ friendRouter.get('/request/received', async (req, res, next) => {
     // Build response object
     const friendRequests: FriendRequestGetResponseObj[] = receivedRequests.map(
       request => ({
-        requestId: request.requestId,
+        requestId: request.id,
         from: request.from,
       })
     );

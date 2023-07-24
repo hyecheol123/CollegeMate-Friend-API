@@ -106,19 +106,19 @@ export default class TestEnv {
     const friendRequestSample: FriendRequest[] = [];
     friendRequestSample.push(
       {
-        requestId: 'sadf989hvsad93ikj',
+        id: 'sadf989hvsad93ikj',
         from: 'random@wisc.edu',
         to: 'steve@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        requestId: 'adsjbzvxn91fdsa',
+        id: 'adsjbzvxn91fdsa',
         from: 'tedpowel123@wisc.edu',
         to: 'steve@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        requestId: 'adsjbzvxn91fdsa',
+        id: 'adsjbzvxn91fds', // NEED TO BE FIXED WHEN API DOC IS UPDATED
         from: 'dalcmap@wisc.edu',
         to: 'steve@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
