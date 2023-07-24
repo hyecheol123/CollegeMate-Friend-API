@@ -9,18 +9,24 @@ import * as Cosmos from '@azure/cosmos';
 const FRIENDREQUEST = 'friendRequest';
 
 export default class FriendRequest {
-  requestId: string;
+  id: string;
   from: string;
   to: string;
   createdAt: Date | string;
 
   constructor(id: string, from: string, to: string, createdAt: Date) {
-    this.requestId = id;
+    this.id = id;
     this.from = from;
     this.to = to;
     this.createdAt = createdAt;
   }
 
+  /**
+   * Read sent friend request and return the request object
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} from "from" field of friend request
+   * @returns sent friend request object
+   */
   static async readSent(
     dbClient: Cosmos.Database,
     from: string
@@ -28,7 +34,7 @@ export default class FriendRequest {
     const friendRequests: FriendRequest[] = [];
 
     const querySpec = {
-      query: `SELECT f.requestId, f['from'], f['to'], f.createdAt FROM ${FRIENDREQUEST} f WHERE f['from']=@from`,
+      query: `SELECT f.id, f['from'], f['to'], f.createdAt FROM ${FRIENDREQUEST} f WHERE f['from']=@from`,
       parameters: [
         {
           name: '@from',

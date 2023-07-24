@@ -106,37 +106,19 @@ export default class TestEnv {
     const friendRequestSample: FriendRequest[] = [];
     friendRequestSample.push(
       {
-        requestId: 'sadf989hvsad93ikj',
-        from: 'random@wisc.edu',
-        to: 'steve@wisc.edu',
-        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-      },
-      {
-        requestId: 'adsjbzvxn91fdsa',
-        from: 'tedpowel123@wisc.edu',
-        to: 'steve@wisc.edu',
-        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-      },
-      {
-        requestId: 'adsjbzvxn91fdsa',
-        from: 'dalcmap@wisc.edu',
-        to: 'steve@wisc.edu',
-        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-      },
-      {
-        requestId: 'sadf989hvsad93ikj',
+        id: 'sadf989hvsad93ikj',
         from: 'park@wisc.edu',
         to: 'random@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        requestId: 'adsjbzvxn91fdsa',
+        id: 'adsjbzvxn91fdsa',
         from: 'park@wisc.edu',
         to: 'tedpowel123@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        requestId: 'adsjbzvxn91fdsa',
+        id: 'adsjbzvxn91fds', // NEED TO BE FIXED WHEN API DOC IS UPDATED
         from: 'park@wisc.edu',
         to: 'dalcmap@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),

@@ -14,6 +14,8 @@ import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
 import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
 
+const FRIENDREQUEST = 'friendRequest';
+
 // Path: /friend
 const friendRouter = express.Router();
 
@@ -74,10 +76,6 @@ friendRouter.get('/request/sent', async (req, res, next) => {
         accessToken,
         req.app.get('jwtAccessKey')
       );
-      // Check if the token is associated with the user email from the request body
-      if (!tokenContents.id.includes('@wisc.edu')) {
-        throw new ForbiddenError();
-      }
     } else {
       throw new UnauthenticatedError();
     }
@@ -92,7 +90,7 @@ friendRouter.get('/request/sent', async (req, res, next) => {
     // Build response object
     const friendRequests: FriendRequestGetResponseObj[] = receivedRequests.map(
       request => ({
-        requestId: request.requestId,
+        requestId: request.id,
         to: request.to,
       })
     );
