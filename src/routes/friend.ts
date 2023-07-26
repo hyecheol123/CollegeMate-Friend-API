@@ -16,6 +16,9 @@ import NotFoundError from '../exceptions/NotFoundError';
 import Friend from '../datatypes/Friend/Friend';
 import ConflictError from '../exceptions/ConflictError';
 import getUser from '../datatypes/User/getUser';
+import Ajv from 'ajv';
+import { validateSendFriendRequest } from '../functions/inputValidator/validateSendFriendRequest';
+import BadRequestError from '../exceptions/BadRequestError';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -61,7 +64,7 @@ friendRouter.post('/request', async (req, res, next) => {
         try {
             // API call - verify User
             const encodedEmail = Buffer.from(yourEmail,'utf-8').toString('base64url');
-            const user = await getUser(req, encodedEmail);
+            await getUser(req, encodedEmail);
         }
         catch(e){
             if (e instanceof Cosmos.ErrorResponse && e.statusCode === 404) {
@@ -73,11 +76,16 @@ friendRouter.post('/request', async (req, res, next) => {
         }
 
         const friendList = await Friend.read(dbClient, myEmail);
-        
+
         for (let index = 0; index < friendList.length; index++) {
             if (friendList === yourEmail) {
             throw new ConflictError();
             }
+        }
+        
+        const friendRequest: {targetEmail: string} = req.body;
+        if (!validateSendFriendRequest(friendRequest)) {
+            throw new BadRequestError();
         }
 
         await FriendRequest.create(dbClient,myEmail,yourEmail);
