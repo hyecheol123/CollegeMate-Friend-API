@@ -14,8 +14,6 @@ import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
 import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
 
-const FRIENDREQUEST = 'friendRequest';
-
 // Path: /friend
 const friendRouter = express.Router();
 

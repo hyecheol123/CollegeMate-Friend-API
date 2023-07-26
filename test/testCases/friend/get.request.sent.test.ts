@@ -86,19 +86,6 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
       testEnv.testConfig.jwt.secretKey,
       {algorithm: 'HS512', expiresIn: '1ms'}
     );
-
-    // Token with invalid Id (not associated with user email)
-    tokenContent = {
-      id: 'joaotsoh@wisc.edu',
-      type: 'access',
-      tokenType: 'user',
-    };
-    // Generate AccessToken
-    accessTokenMap.invalidId = jwt.sign(
-      tokenContent,
-      testEnv.testConfig.jwt.secretKey,
-      {algorithm: 'HS512', expiresIn: '10m'}
-    );
   });
 
   afterEach(async () => {
@@ -108,7 +95,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
   test('Fail - No Access Token', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    //reqeust
+    // reqeust without a token
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/sent')
       .set({Origin: 'https://collegemate.app'});
@@ -122,6 +109,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     // Wait for 5 ms
     await new Promise(resolve => setTimeout(resolve, 5));
 
+    // request with an expired access token
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': accessTokenMap.expired})
@@ -133,6 +121,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
   test('Fail - Wrong Token', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
+    // reqeust with admin token
     let response = await request(testEnv.expressServer.app)
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': accessTokenMap.admin})
@@ -140,6 +129,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.status).toBe(403);
     expect(response.body.error).toBe('Forbidden');
 
+    // request with refresh token
     response = await request(testEnv.expressServer.app)
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': accessTokenMap.refresh})
@@ -147,6 +137,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.status).toBe(403);
     expect(response.body.error).toBe('Forbidden');
 
+    // request with "wrong" token
     response = await request(testEnv.expressServer.app)
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': 'wrong'})
@@ -182,21 +173,10 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  // test('Fail - Token includes invalid Id', async () => {
-  //   testEnv.expressServer = testEnv.expressServer as ExpressServer;
-
-  //   const response = await request(testEnv.expressServer.app)
-  //     .get('/friend/request/sent')
-  //     .set({'X-ACCESS-TOKEN': accessTokenMap.invalidId})
-  //     .set({Origin: 'https://collegemate.app'});
-    
-  //   const responseEmail = response.body.friendRequest
-  // });
-
   test('Success', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    //request
+    // valid request
     const response = await request(testEnv.expressServer.app)
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
@@ -209,11 +189,14 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.body.friendRequests[1]).toHaveProperty('to');
     expect(response.body.friendRequests[2]).toHaveProperty('requestId');
     expect(response.body.friendRequests[2]).toHaveProperty('to');
-    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ikj');
+    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ik');
     expect(response.body.friendRequests[0].to).toBe('random@wisc.edu');
-    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fdsa');
+    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fd');
     expect(response.body.friendRequests[1].to).toBe('tedpowel123@wisc.edu');
-    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds'); // NEED TO BE FIXED WHEN API DOC IS UPDATED
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91f');
     expect(response.body.friendRequests[2].to).toBe('dalcmap@wisc.edu');
+    expect(response.body.friendRequests[0]).not.toHaveProperty('from');
+    expect(response.body.friendRequests[1]).not.toHaveProperty('from');
+    expect(response.body.friendRequests[2]).not.toHaveProperty('from');
   });
 });

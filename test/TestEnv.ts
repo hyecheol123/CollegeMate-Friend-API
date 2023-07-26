@@ -107,18 +107,36 @@ export default class TestEnv {
     friendRequestSample.push(
       {
         id: 'sadf989hvsad93ikj',
+        from: 'random@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: 'adsjbzvxn91fdsa',
+        from: 'tedpowel123@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: 'adsjbzvxn91fds',
+        from: 'dalcmap@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: 'sadf989hvsad93ik',
         from: 'park@wisc.edu',
         to: 'random@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        id: 'adsjbzvxn91fdsa',
+        id: 'adsjbzvxn91fd',
         from: 'park@wisc.edu',
         to: 'tedpowel123@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        id: 'adsjbzvxn91fds', // NEED TO BE FIXED WHEN API DOC IS UPDATED
+        id: 'adsjbzvxn91f',
         from: 'park@wisc.edu',
         to: 'dalcmap@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
