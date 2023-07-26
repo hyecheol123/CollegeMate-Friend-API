@@ -7,6 +7,7 @@
 
 import * as Cosmos from '@azure/cosmos';
 import NotFoundError from '../../exceptions/NotFoundError';
+import ServerConfig from '../../ServerConfig';
 
 const FRIENDREQUEST = 'friendRequest';
 
@@ -75,7 +76,7 @@ export default class FriendRequest {
     to: string
   ): Promise<void> {
     try{
-        const id = "mashidda";
+        const id = ServerConfig.hash(`${from}/${to}`,from,to);
         const createdAt = new Date();
         const friendRequest = new FriendRequest(id,from,to,createdAt);
         await dbClient.container(FRIENDREQUEST).items.create(friendRequest);

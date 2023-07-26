@@ -2,6 +2,7 @@
  * Express Router middeware for Friend APIs
  *
  * @author Hyecheol (Jerry) Jang
+ * @author Jeonghyeon Park <fishbox0923@gmail.com>
  */
 
 import * as express from 'express';
@@ -11,10 +12,10 @@ import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
-import User from '../datatypes/User/User';
 import NotFoundError from '../exceptions/NotFoundError';
 import Friend from '../datatypes/Friend/Friend';
 import ConflictError from '../exceptions/ConflictError';
+import getUser from '../datatypes/User/getUser';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -58,7 +59,9 @@ friendRouter.post('/request', async (req, res, next) => {
         const myEmail = tokenContents.id;
 
         try {
-            await User.read(dbClient,yourEmail);
+            // API call - verify User
+            const encodedEmail = Buffer.from(yourEmail,'utf-8').toString('base64url');
+            const user = await getUser(req, encodedEmail);
         }
         catch(e){
             if (e instanceof Cosmos.ErrorResponse && e.statusCode === 404) {
@@ -70,20 +73,20 @@ friendRouter.post('/request', async (req, res, next) => {
         }
 
         const friendList = await Friend.read(dbClient, myEmail);
+        
         for (let index = 0; index < friendList.length; index++) {
             if (friendList === yourEmail) {
             throw new ConflictError();
             }
         }
+
+        await FriendRequest.create(dbClient,myEmail,yourEmail);
+
         res.status(201).send();
     }
     catch(e) {
         next(e);
     }
-
-
-
-    
 });
 
 // GET: /friend/request/received
