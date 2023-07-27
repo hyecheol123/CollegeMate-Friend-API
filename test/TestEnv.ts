@@ -7,13 +7,14 @@
  * Teardown test environment after test
  *  - Remove used table and close database connection from the express server
  *
- * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Hyecheol (steve) Jang <hyecheol123@gmail.com>
  */
 
 import * as crypto from 'crypto';
 import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
+import FriendRequest from '../src/datatypes/Friend/FriendRequest';
 
 /**
  * Class for Test Environment
@@ -69,11 +70,11 @@ export default class TestEnv {
         indexingMode: 'consistent',
         automatic: true,
         includedPaths: [{path: '/*'}],
-        excludedPaths: [{path: '/since/?'}],
+        excludedPaths: [{path: '/createdAt/?'}],
       },
       uniqueKeyPolicy: {
-        // email1 and email2 should be in alphabetical order
-        uniqueKeys: [{paths: ['/email1', '/email2']}],
+        // from and to should be in alphabetical order
+        uniqueKeys: [{paths: ['/from', '/to']}],
       },
     });
     /* istanbul ignore next */
@@ -100,7 +101,36 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // TODO: Create a new friend request entry
+    // Create a new friend entries
+    const friendRequestSample: FriendRequest[] = [];
+    friendRequestSample.push(
+      {
+        id: TestConfig.hash(
+          'jeonghyeon@wisc.edu/steve@wisc.edu',
+          'jeonghyeon@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        from: 'jeonghyeon@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'jerry@wisc.edu/steve@wisc.edu',
+          'jerry@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        from: 'drag@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      }
+    );
+
+    for (let index = 0; index < friendRequestSample.length; index++) {
+      await this.dbClient
+        .container('friendRequest')
+        .items.create(friendRequestSample[index]);
+    }
 
     // Setup Express Server
     this.expressServer = new ExpressServer(this.testConfig);
