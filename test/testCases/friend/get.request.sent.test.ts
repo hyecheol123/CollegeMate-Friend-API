@@ -173,7 +173,7 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Success', async () => {
+  test('Success on web', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     // valid request
@@ -181,6 +181,33 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
       .get('/friend/request/sent')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('friendRequests');
+    expect(response.body.friendRequests[0]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[0]).toHaveProperty('to');
+    expect(response.body.friendRequests[1]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[1]).toHaveProperty('to');
+    expect(response.body.friendRequests[2]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[2]).toHaveProperty('to');
+    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ik');
+    expect(response.body.friendRequests[0].to).toBe('random@wisc.edu');
+    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fd');
+    expect(response.body.friendRequests[1].to).toBe('tedpowel123@wisc.edu');
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91f');
+    expect(response.body.friendRequests[2].to).toBe('dalcmap@wisc.edu');
+    expect(response.body.friendRequests[0]).not.toHaveProperty('from');
+    expect(response.body.friendRequests[1]).not.toHaveProperty('from');
+    expect(response.body.friendRequests[2]).not.toHaveProperty('from');
+  });
+
+  test('Success on app', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // valid request
+    const response = await request(testEnv.expressServer.app)
+      .get('/friend/request/sent')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({'X-APPLICATION-KEY': '<Android-App-v1>'});
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('friendRequests');
     expect(response.body.friendRequests[0]).toHaveProperty('requestId');
