@@ -81,7 +81,19 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // TODO: Create a new friend entry
+    // Create a new friend entries
+    const friendSample = {
+      id: TestConfig.hash(
+        'steve@wisc.edu/drag@wisc.edu',
+        'steve@wisc.edu',
+        'drag@wisc.edu'
+      ),
+      email1: 'steve@wisc.edu',
+      email2: 'drag@wisc.edu',
+      since: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+    };
+
+    await this.dbClient.container('friend').items.create(friendSample);
 
     // friend request container
     containerOps = await this.dbClient.containers.create({
@@ -101,7 +113,7 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // TODO: Create a new friend request entry
+    // Create a new friend request entry
 
     // Setup Express Server
     this.expressServer = new ExpressServer(this.testConfig);

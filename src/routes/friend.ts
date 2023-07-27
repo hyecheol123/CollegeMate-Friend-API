@@ -16,9 +16,9 @@ import NotFoundError from '../exceptions/NotFoundError';
 import Friend from '../datatypes/Friend/Friend';
 import ConflictError from '../exceptions/ConflictError';
 import getUser from '../datatypes/User/getUser';
-import Ajv from 'ajv';
-import { validateSendFriendRequest } from '../functions/inputValidator/validateSendFriendRequest';
+import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import BadRequestError from '../exceptions/BadRequestError';
+import {Buffer} from 'node:buffer';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -35,66 +35,68 @@ const friendRouter = express.Router();
 
 // POST: /friend/request
 friendRouter.post('/request', async (req, res, next) => {
-    const dbClient: Cosmos.Database = req.app.locals.dbClient;
-    
+  const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+  try {
+    // Check Origin header or application key
+    if (
+      req.header('Origin') !== req.app.get('webpageOrigin') &&
+      !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+    ) {
+      throw new ForbiddenError();
+    }
+
+    // Check access token
+    let tokenContents: AuthToken | undefined = undefined;
+    const accessToken = req.header('X-ACCESS-TOKEN');
+    if (accessToken !== undefined) {
+      tokenContents = verifyAccessToken(
+        accessToken,
+        req.app.get('jwtAccessKey')
+      );
+    } else {
+      throw new UnauthenticatedError();
+    }
+
+    // If the request body format is not valid
+    const friendRequest: {targetEmail: string} = req.body;
+    if (!validateSendFriendRequest(friendRequest)) {
+      throw new BadRequestError();
+    }
+
+    const yourEmail = req.body.targetEmail;
+    const myEmail = tokenContents.id;
+
+    // Read FRIEND database
+    const friendList = await Friend.read(dbClient, myEmail);
+
+    // If they are already friend
+    for (let index = 0; index < friendList.length; index++) {
+      if (friendList[index] === yourEmail) {
+        throw new ConflictError();
+      }
+    }
+
     try {
-        // Check Origin header or application key
-        if (
-          req.header('Origin') !== req.app.get('webpageOrigin') &&
-          !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
-        ) {
-          throw new ForbiddenError();
-        }
-
-        // Check access token
-        let tokenContents: AuthToken | undefined = undefined;
-        const accessToken = req.header('X-ACCESS-TOKEN');
-        if (accessToken !== undefined) {
-        tokenContents = verifyAccessToken(
-            accessToken,
-            req.app.get('jwtAccessKey')
-        );
-        } else {
-        throw new UnauthenticatedError();
-        }
-
-        const yourEmail = req.body.targetEmail;
-        const myEmail = tokenContents.id;
-
-        try {
-            // API call - verify User
-            const encodedEmail = Buffer.from(yourEmail,'utf-8').toString('base64url');
-            await getUser(req, encodedEmail);
-        }
-        catch(e){
-            if (e instanceof Cosmos.ErrorResponse && e.statusCode === 404) {
-                throw new NotFoundError();
-            }
-            else {
-                throw e;
-            }
-        }
-
-        const friendList = await Friend.read(dbClient, myEmail);
-
-        for (let index = 0; index < friendList.length; index++) {
-            if (friendList === yourEmail) {
-            throw new ConflictError();
-            }
-        }
-        
-        const friendRequest: {targetEmail: string} = req.body;
-        if (!validateSendFriendRequest(friendRequest)) {
-            throw new BadRequestError();
-        }
-
-        await FriendRequest.create(dbClient,myEmail,yourEmail);
-
-        res.status(201).send();
+      // API call - verify User
+      const encodedEmail = Buffer.from(`${yourEmail}`, 'utf-8').toString(
+        'base64url'
+      );
+      await getUser(req, encodedEmail);
+    } catch (e) {
+      if (e instanceof Cosmos.ErrorResponse && e.status === 404) {
+        throw new NotFoundError();
+      } else {
+        throw e;
+      }
     }
-    catch(e) {
-        next(e);
-    }
+
+    await FriendRequest.createRequest(dbClient, myEmail, yourEmail);
+
+    res.status(201).send();
+  } catch (e) {
+    next(e);
+  }
 });
 
 // GET: /friend/request/received
