@@ -172,7 +172,7 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Success', async () => {
+  test('Success on web', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     // valid request
@@ -192,7 +192,34 @@ describe('GET /friend/request/received - Get Received Friend Requests', () => {
     expect(response.body.friendRequests[0].from).toBe('random@wisc.edu');
     expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fdsa');
     expect(response.body.friendRequests[1].from).toBe('tedpowel123@wisc.edu');
-    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds'); //NEED TO BE FIXED WHEN API DOC IS UPDATED
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds');
+    expect(response.body.friendRequests[2].from).toBe('dalcmap@wisc.edu');
+    expect(response.body.friendRequests[0]).not.toHaveProperty('to');
+    expect(response.body.friendRequests[1]).not.toHaveProperty('to');
+    expect(response.body.friendRequests[2]).not.toHaveProperty('to');
+  });
+
+  test('Success on app', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // valid request
+    const response = await request(testEnv.expressServer.app)
+      .get('/friend/request/received')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({'X-APPLICATION-KEY': '<Android-App-v1>'});
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('friendRequests');
+    expect(response.body.friendRequests[0]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[0]).toHaveProperty('from');
+    expect(response.body.friendRequests[1]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[1]).toHaveProperty('from');
+    expect(response.body.friendRequests[2]).toHaveProperty('requestId');
+    expect(response.body.friendRequests[2]).toHaveProperty('from');
+    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ikj');
+    expect(response.body.friendRequests[0].from).toBe('random@wisc.edu');
+    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fdsa');
+    expect(response.body.friendRequests[1].from).toBe('tedpowel123@wisc.edu');
+    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91fds');
     expect(response.body.friendRequests[2].from).toBe('dalcmap@wisc.edu');
     expect(response.body.friendRequests[0]).not.toHaveProperty('to');
     expect(response.body.friendRequests[1]).not.toHaveProperty('to');

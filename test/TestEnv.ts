@@ -118,7 +118,7 @@ export default class TestEnv {
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        id: 'adsjbzvxn91fds', // NEED TO BE FIXED WHEN API DOC IS UPDATED
+        id: 'adsjbzvxn91fds',
         from: 'dalcmap@wisc.edu',
         to: 'steve@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
