@@ -26,7 +26,7 @@ describe('POST /friend/request - Send Friend Request', () => {
     'invalid@wisc.edu',
     'requestid@wisc.edu'
   );
-
+  
   let testEnv: TestEnv;
 
   const accessTokenMap = {
@@ -199,9 +199,11 @@ describe('POST /friend/request - Send Friend Request', () => {
 
   test('Fail - Friend Request is not Found', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
-    const response = await request(testEnv.expressServer.app)
+    
+    let response = await request(testEnv.expressServer.app)
       .delete(`/friend/request/received/${validFriendRequestId}`)
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(200);
   });
 });

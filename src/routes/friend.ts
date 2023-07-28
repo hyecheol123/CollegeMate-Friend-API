@@ -63,7 +63,7 @@ friendRouter.delete(
         throw new UnauthenticatedError();
       }
 
-      const friendRequestId = req.body.friendRequestId;
+      const friendRequestId = req.params.friendRequestId;
       const userEmail = tokenContents.id;
 
       const userReceivedRequests: FriendRequest[] =
@@ -71,7 +71,7 @@ friendRouter.delete(
 
       const canFound: boolean = userReceivedRequests.some(
         (request: FriendRequest) => {
-          return request.id === friendRequestId;
+          return (request.id === friendRequestId);
         }
       );
 

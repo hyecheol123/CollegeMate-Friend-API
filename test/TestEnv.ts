@@ -101,36 +101,45 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // Create a new friend entries
-    const friendRequestSample: FriendRequest[] = [];
-    friendRequestSample.push(
-      {
-        id: TestConfig.hash(
-          'jeonghyeon@wisc.edu/steve@wisc.edu',
-          'jeonghyeon@wisc.edu',
-          'steve@wisc.edu'
-        ),
-        from: 'jeonghyeon@wisc.edu',
-        to: 'steve@wisc.edu',
-        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-      },
-      {
-        id: TestConfig.hash(
-          'jerry@wisc.edu/steve@wisc.edu',
-          'jerry@wisc.edu',
-          'steve@wisc.edu'
-        ),
-        from: 'drag@wisc.edu',
-        to: 'steve@wisc.edu',
-        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-      }
-    );
-
-    for (let index = 0; index < friendRequestSample.length; index++) {
-      await this.dbClient
-        .container('friendRequest')
-        .items.create(friendRequestSample[index]);
-    }
+     // Create a new friend entries
+     const friendRequestSample: FriendRequest[] = [];
+     friendRequestSample.push(
+       {
+         id: TestConfig.hash(
+           'jeonghyeon@wisc.edu/steve@wisc.edu',
+           'jeonghyeon@wisc.edu',
+           'steve@wisc.edu'
+         ),
+         from: 'jeonghyeon@wisc.edu',
+         to: 'steve@wisc.edu',
+         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+       },
+       {
+         id: TestConfig.hash(
+           'drag@wisc.edu/steve@wisc.edu',
+           'drag@wisc.edu',
+           'steve@wisc.edu'
+         ),
+         from: 'drag@wisc.edu',
+         to: 'steve@wisc.edu',
+         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+       },
+       {
+         id: TestConfig.hash(
+           'jerry@wisc.edu/steve@wisc.edu',
+           'jerry@wisc.edu',
+           'steve@wisc.edu'
+         ),
+         from: 'jerry@wisc.edu',
+         to: 'steve@wisc.edu',
+         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+       },
+     );
+ 
+     for (let index = 0; index < friendRequestSample.length; index++) {
+       await this.dbClient.container('friendRequest').items.create(friendRequestSample[index]);
+     }
+ 
 
     // Setup Express Server
     this.expressServer = new ExpressServer(this.testConfig);
