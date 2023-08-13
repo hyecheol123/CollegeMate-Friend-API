@@ -8,6 +8,7 @@
  *  - Remove used table and close database connection from the express server
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  * @author Jeonghyeon Park <fishbox0923@gmail.com>
  */
 
@@ -15,6 +16,8 @@ import * as crypto from 'crypto';
 import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
+import Friend from '../src/datatypes/Friend/Friend';
+import FriendRequest from '../src/datatypes/Friend/FriendRequest';
 
 /**
  * Class for Test Environment
@@ -72,28 +75,69 @@ export default class TestEnv {
         includedPaths: [{path: '/*'}],
         excludedPaths: [{path: '/since/?'}],
       },
-      uniqueKeyPolicy: {
-        // email1 and email2 should be in alphabetical order
-        uniqueKeys: [{paths: ['/email1', '/email2']}],
-      },
     });
     /* istanbul ignore next */
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
     // Create a new friend entries
-    const friendSample = {
-      id: TestConfig.hash(
-        'steve@wisc.edu/drag@wisc.edu',
-        'steve@wisc.edu',
-        'drag@wisc.edu'
-      ),
-      email1: 'steve@wisc.edu',
-      email2: 'drag@wisc.edu',
-      since: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-    };
+    const friendSample: Friend[] = [];
+    friendSample.push(
+      {
+        id: TestConfig.hash(
+          'steve@wisc.edu/drag@wisc.edu',
+          'steve@wisc.edu',
+          'drag@wisc.edu'
+        ),
+        email1: 'steve@wisc.edu',
+        email2: 'drag@wisc.edu',
+        since: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'jeonghyeon@wisc.edu/steve@wisc.edu',
+          'jeonghyeon@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        email1: 'jeonghyeon@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date().toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'drag@wisc.edu/jerry@wisc.edu',
+          'drag@wisc.edu',
+          'jerry@wisc.edu'
+        ),
+        email1: 'drag@wisc.edu',
+        email2: 'jerry@wisc.edu',
+        since: new Date().toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'jerry@wisc.edu/steve@wisc.edu',
+          'jerry@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        email1: 'jerry@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date().toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'daekyun@wisc.edu/steve@wisc.edu',
+          'daekyun@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        email1: 'daekyun@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date().toISOString(),
+      }
+    );
 
-    await this.dbClient.container('friend').items.create(friendSample);
+    for (let index = 0; index < friendSample.length; index++) {
+      await this.dbClient.container('friend').items.create(friendSample[index]);
+    }
 
     // friend request container
     containerOps = await this.dbClient.containers.create({
@@ -102,11 +146,7 @@ export default class TestEnv {
         indexingMode: 'consistent',
         automatic: true,
         includedPaths: [{path: '/*'}],
-        excludedPaths: [
-          {path: '/from/?'},
-          {path: '/to/?'},
-          {path: '/createdAt/?'},
-        ],
+        excludedPaths: [{path: '/createdAt/?'}],
       },
     });
     /* istanbul ignore next */
@@ -114,6 +154,99 @@ export default class TestEnv {
       throw new Error(JSON.stringify(containerOps));
     }
     // Create a new friend request entry
+    const friendRequestSample: FriendRequest[] = [];
+    friendRequestSample.push(
+      {
+        id: TestConfig.hash(
+          `random@wisc.edu/steve@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'random@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        from: 'random@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `tedpowel123@wisc.edu/steve@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'tedpowel123@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        from: 'tedpowel123@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `dalcmap@wisc.edu/steve@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'dalcmap@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        from: 'dalcmap@wisc.edu',
+        to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `park@wisc.edu/random@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'random@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'random@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `park@wisc.edu/tedpowel123@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'tedpowel123@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'tedpowel123@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `park@wisc.edu/dalcmap@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'dalcmap@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'dalcmap@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `steve@wisc.edu/dickdick@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'steve@wisc.edu',
+          'dickdick@wisc.edu'
+        ),
+        from: 'steve@wisc.edu',
+        to: 'dickdick@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      }
+    );
+
+    for (let index = 0; index < friendRequestSample.length; index++) {
+      await this.dbClient
+        .container('friendRequest')
+        .items.create(friendRequestSample[index]);
+    }
 
     // Setup Express Server
     this.expressServer = new ExpressServer(this.testConfig);
