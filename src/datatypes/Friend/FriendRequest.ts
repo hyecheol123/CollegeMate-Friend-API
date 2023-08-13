@@ -36,7 +36,7 @@ export default class FriendRequest {
       await dbClient
         .container(FRIEND_REQUEST)
         .items.query({
-          query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE f.from=@from`,
+          query: `SELECT * FROM ${FRIEND_REQUEST} AS f WHERE f["from"]=@from`,
           parameters: [{name: '@from', value: from}],
         })
         .fetchAll()
