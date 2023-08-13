@@ -32,27 +32,15 @@ export default class FriendRequest {
     dbClient: Cosmos.Database,
     from: string
   ): Promise<FriendRequest[]> {
-    const friendRequests: FriendRequest[] = [];
-
-    const querySpec = {
-      query: `SELECT f.id, f['from'], f['to'], f.createdAt FROM ${FRIEND_REQUEST} f WHERE f['from']=@from`,
-      parameters: [
-        {
-          name: '@from',
-          value: from,
-        },
-      ],
-    };
-    const dbOps = await dbClient
-      .container(FRIEND_REQUEST)
-      .items.query(querySpec)
-      .fetchAll();
-
-    for (const item of dbOps.resources) {
-      friendRequests.push(item);
-    }
-
-    return friendRequests;
+    return (
+      await dbClient
+        .container(FRIEND_REQUEST)
+        .items.query({
+          query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE f.from=@from`,
+          parameters: [{name: '@from', value: from}],
+        })
+        .fetchAll()
+    ).resources;
   }
   /**
    * Read received friend request and return the request object
