@@ -16,8 +16,8 @@ import * as crypto from 'crypto';
 import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
-import FriendRequest from '../src/datatypes/Friend/FriendRequest';
 import Friend from '../src/datatypes/Friend/Friend';
+import FriendRequest from '../src/datatypes/Friend/FriendRequest';
 
 /**
  * Class for Test Environment
@@ -180,6 +180,42 @@ export default class TestEnv {
         ),
         from: 'dalcmap@wisc.edu',
         to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `park@wisc.edu/random@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'random@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'random@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `park@wisc.edu/tedpowel123@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'tedpowel123@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'tedpowel123@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `park@wisc.edu/dalcmap@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'dalcmap@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'dalcmap@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {

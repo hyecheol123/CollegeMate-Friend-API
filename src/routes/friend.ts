@@ -8,13 +8,13 @@
 
 import * as express from 'express';
 import * as Cosmos from '@azure/cosmos';
+import AuthToken from '../datatypes/Token/AuthToken';
 import Friend from '../datatypes/Friend/Friend';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
 import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
-import AuthToken from '../datatypes/Token/AuthToken';
-import NotFoundError from '../exceptions/NotFoundError';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
+import NotFoundError from '../exceptions/NotFoundError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
 
@@ -163,9 +163,45 @@ friendRouter.get('/request/received', async (req, res, next) => {
 // );
 
 // GET: /friend/request/sent
-// friendRouter.get('/request/sent', async (req, res, next) => {
-//   // TODO;
-// });
+friendRouter.get('/request/sent', async (req, res, next) => {
+  const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+  try {
+    // Check Origin header or application key
+    if (
+      req.header('Origin') !== req.app.get('webpageOrigin') &&
+      !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+    ) {
+      throw new ForbiddenError();
+    }
+
+    // Check access token
+    let tokenContents: AuthToken | undefined = undefined;
+    const accessToken = req.header('X-ACCESS-TOKEN');
+    if (accessToken !== undefined) {
+      tokenContents = verifyAccessToken(
+        accessToken,
+        req.app.get('jwtAccessKey')
+      );
+    } else {
+      throw new UnauthenticatedError();
+    }
+    // DB Operation - get list of received friend requests
+    const email = tokenContents.id;
+
+    // Build response object
+    const receivedRequests = await FriendRequest.readSent(dbClient, email);
+    const friendRequests: FriendRequestGetResponseObj[] = receivedRequests.map(
+      request => ({
+        requestId: request.id,
+        to: request.to,
+      })
+    );
+    res.status(200).json({friendRequests});
+  } catch (e) {
+    next(e);
+  }
+});
 
 // DELETE /friend/request/sent/{friendRequestId}
 // friendRouter.delete(

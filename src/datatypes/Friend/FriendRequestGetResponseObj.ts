@@ -4,5 +4,6 @@
  */
 export default interface FriendRequestGetResponseObj {
   requestId: string;
-  from: string;
+  from?: string;
+  to?: string;
 }

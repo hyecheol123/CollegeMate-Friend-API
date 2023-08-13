@@ -22,7 +22,29 @@ export default class FriendRequest {
   }
 
   /**
+   * Read sent friend request and return the request object
+   *
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} from "from" field of friend request
+   * @returns sent friend request object
+   */
+  static async readSent(
+    dbClient: Cosmos.Database,
+    from: string
+  ): Promise<FriendRequest[]> {
+    return (
+      await dbClient
+        .container(FRIEND_REQUEST)
+        .items.query({
+          query: `SELECT * FROM ${FRIEND_REQUEST} AS f WHERE f["from"]=@from`,
+          parameters: [{name: '@from', value: from}],
+        })
+        .fetchAll()
+    ).resources;
+  }
+  /**
    * Read received friend request and return the request object
+   *
    * @param {Cosmos.Database} dbClient Cosmos DB Client
    * @param {string} to "to" field of friend request
    * @returns received friend request object
