@@ -11,6 +11,7 @@ import * as jwt from 'jsonwebtoken';
 import TestEnv from '../../TestEnv';
 import ExpressServer from '../../../src/ExpressServer';
 import AuthToken from '../../../src/datatypes/Token/AuthToken';
+import TestConfig from '../../TestConfig';
 
 describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
   let testEnv: TestEnv;
@@ -189,11 +190,35 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.body.friendRequests[1]).toHaveProperty('to');
     expect(response.body.friendRequests[2]).toHaveProperty('requestId');
     expect(response.body.friendRequests[2]).toHaveProperty('to');
-    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ik');
+    expect(response.body.friendRequests[0].requestId).toBe(
+      TestConfig.hash(
+        `park@wisc.edu/random@wisc.edu/${new Date(
+          '2023-02-10T00:50:43.000Z'
+        ).toISOString()}`,
+        'park@wisc.edu',
+        'random@wisc.edu'
+      )
+    );
     expect(response.body.friendRequests[0].to).toBe('random@wisc.edu');
-    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fd');
+    expect(response.body.friendRequests[1].requestId).toBe(
+      TestConfig.hash(
+        `park@wisc.edu/tedpowel123@wisc.edu/${new Date(
+          '2023-02-10T00:50:43.000Z'
+        ).toISOString()}`,
+        'park@wisc.edu',
+        'tedpowel123@wisc.edu'
+      )
+    );
     expect(response.body.friendRequests[1].to).toBe('tedpowel123@wisc.edu');
-    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91f');
+    expect(response.body.friendRequests[2].requestId).toBe(
+      TestConfig.hash(
+        `park@wisc.edu/dalcmap@wisc.edu/${new Date(
+          '2023-02-10T00:50:43.000Z'
+        ).toISOString()}`,
+        'park@wisc.edu',
+        'dalcmap@wisc.edu'
+      )
+    );
     expect(response.body.friendRequests[2].to).toBe('dalcmap@wisc.edu');
     expect(response.body.friendRequests[0]).not.toHaveProperty('from');
     expect(response.body.friendRequests[1]).not.toHaveProperty('from');
@@ -216,11 +241,35 @@ describe('GET /friend/request/sent - Get Sent Friend Requests', () => {
     expect(response.body.friendRequests[1]).toHaveProperty('to');
     expect(response.body.friendRequests[2]).toHaveProperty('requestId');
     expect(response.body.friendRequests[2]).toHaveProperty('to');
-    expect(response.body.friendRequests[0].requestId).toBe('sadf989hvsad93ik');
+    expect(response.body.friendRequests[0].requestId).toBe(
+      TestConfig.hash(
+        `park@wisc.edu/random@wisc.edu/${new Date(
+          '2023-02-10T00:50:43.000Z'
+        ).toISOString()}`,
+        'park@wisc.edu',
+        'random@wisc.edu'
+      )
+    );
     expect(response.body.friendRequests[0].to).toBe('random@wisc.edu');
-    expect(response.body.friendRequests[1].requestId).toBe('adsjbzvxn91fd');
+    expect(response.body.friendRequests[1].requestId).toBe(
+      TestConfig.hash(
+        `park@wisc.edu/tedpowel123@wisc.edu/${new Date(
+          '2023-02-10T00:50:43.000Z'
+        ).toISOString()}`,
+        'park@wisc.edu',
+        'tedpowel123@wisc.edu'
+      )
+    );
     expect(response.body.friendRequests[1].to).toBe('tedpowel123@wisc.edu');
-    expect(response.body.friendRequests[2].requestId).toBe('adsjbzvxn91f');
+    expect(response.body.friendRequests[2].requestId).toBe(
+      TestConfig.hash(
+        `park@wisc.edu/dalcmap@wisc.edu/${new Date(
+          '2023-02-10T00:50:43.000Z'
+        ).toISOString()}`,
+        'park@wisc.edu',
+        'dalcmap@wisc.edu'
+      )
+    );
     expect(response.body.friendRequests[2].to).toBe('dalcmap@wisc.edu');
     expect(response.body.friendRequests[0]).not.toHaveProperty('from');
     expect(response.body.friendRequests[1]).not.toHaveProperty('from');
