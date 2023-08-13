@@ -16,7 +16,7 @@ import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import NotFoundError from '../exceptions/NotFoundError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
-import {validateEmail} from '../functions/inputValidator/validateEmail';
+import { validateEmail } from '../functions/inputValidator/validateEmail';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -46,7 +46,7 @@ friendRouter.get('/', async (req, res, next) => {
 
     // DB Operation - get list of friends
     const email = tokenContents.id;
-    const friendListResponseObj: {friendList: string[]} = {
+    const friendListResponseObj: { friendList: string[] } = {
       friendList: await Friend.readFriendEmailList(dbClient, email),
     };
 
@@ -140,7 +140,7 @@ friendRouter.get('/request/received', async (req, res, next) => {
         from: request.from,
       })
     );
-    res.status(200).json({friendRequests});
+    res.status(200).json({ friendRequests });
   } catch (e) {
     next(e);
   }
@@ -189,19 +189,15 @@ friendRouter.get('/request/sent', async (req, res, next) => {
     // DB Operation - get list of received friend requests
     const email = tokenContents.id;
 
-    const receivedRequests: FriendRequest[] = await FriendRequest.readSent(
-      dbClient,
-      email
-    );
-
     // Build response object
+    const receivedRequests = await FriendRequest.readSent(dbClient, email);
     const friendRequests: FriendRequestGetResponseObj[] = receivedRequests.map(
       request => ({
         requestId: request.id,
         to: request.to,
       })
     );
-    res.status(200).json({friendRequests});
+    res.status(200).json({ friendRequests });
   } catch (e) {
     next(e);
   }
