@@ -19,26 +19,43 @@ export default class Friend {
   /**
    * Constructor for Friend Relationship
    *
-   * @param email1 email of user 1
-   * @param email2 email of user 2
-   * @param since date of friendship
+   * @param {string} id unique id representing the friend relationship
+   * @param {string} email1 email of user 1
+   * @param {string} email2 email of user 2
+   * @param {Date} since date of friendship
    */
-  constructor(email1: string, email2: string, since: Date) {
-    this.email1 = email1 < email2 ? email1 : email2;
-    this.email2 = email1 < email2 ? email2 : email1;
-    this.id = ServerConfig.hash(
-      `${this.email1}/${this.email2}`,
-      this.email1,
-      this.email2
-    );
+  constructor(id: string, email1: string, email2: string, since: Date) {
+    this.email1 = email1;
+    this.email2 = email2;
+    this.id = id;
     this.since = since;
+  }
+
+  /**
+   * Get a friend relationship object
+   *
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} id unique id representing the friend entry
+   */
+  static async read(dbClient: Cosmos.Database, id: string): Promise<Friend> {
+    const result = await dbClient.container(FRIEND).item(id).read<Friend>();
+    if (result.statusCode === 404 || result.resource === undefined) {
+      throw new NotFoundError();
+    }
+
+    return new Friend(
+      result.resource.id,
+      result.resource.email1,
+      result.resource.email2,
+      new Date(result.resource.since)
+    );
   }
 
   /**
    * Get list of all friends of a user
    *
-   * @param dbClient Cosmos DB client
-   * @param email email of user
+   * @param {Cosmos.Database} dbClient Cosmos DB client
+   * @param {string} email email of user
    */
   static async readFriendEmailList(
     dbClient: Cosmos.Database,

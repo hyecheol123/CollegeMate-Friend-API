@@ -9,6 +9,7 @@
 import * as express from 'express';
 import * as Cosmos from '@azure/cosmos';
 import {Buffer} from 'node:buffer';
+import ServerConfig from '../ServerConfig';
 import AuthToken from '../datatypes/Token/AuthToken';
 import Friend from '../datatypes/Friend/Friend';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
@@ -22,7 +23,6 @@ import ConflictError from '../exceptions/ConflictError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
-import ServerConfig from '../ServerConfig';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -138,17 +138,32 @@ friendRouter.post('/request', async (req, res, next) => {
     const fromEmail = tokenContents.id;
 
     // Check for target user eligibility
-    todo();
-
-    // Check for already existing friend
-    const friendList = await Friend.read(dbClient, fromEmail);
-    for (let index = 0; index < friendList.length; index++) {
-      if (friendList[index] === toEmail) {
-        throw new ConflictError();
-      }
+    const userProfile = await getUserProfile(toEmail, req);
+    if (userProfile.deleted || userProfile.locked) {
+      throw new NotFoundError();
     }
 
-    // Check for already existing friend request
+    // Check for already existing friend
+    const email1 = fromEmail < toEmail ? fromEmail : toEmail;
+    const email2 = fromEmail < toEmail ? toEmail : fromEmail;
+    const friendRelationId = ServerConfig.hash(
+      `${email1}/${email2}`,
+      email1,
+      email2
+    );
+    let friendRelation: Friend | undefined;
+    try {
+      friendRelation = await Friend.read(dbClient, friendRelationId);
+    } catch (e) {
+      if (!(e instanceof NotFoundError)) {
+        throw e;
+      }
+    }
+    if (friendRelation !== undefined) {
+      throw new ConflictError();
+    }
+
+    // Check for already existing friend request (Check both way)
     todo();
 
     // DB Operation
