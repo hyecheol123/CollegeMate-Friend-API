@@ -39,7 +39,7 @@ export default class Friend {
    * @param dbClient Cosmos DB client
    * @param email email of user
    */
-  static async read(
+  static async readFriendEmailList(
     dbClient: Cosmos.Database,
     email: string
   ): Promise<string[]> {

@@ -41,7 +41,7 @@ friendRouter.get('/', async (req, res, next) => {
     // DB Operation - get list of friends
     const email = tokenContents.id;
     const friendListResponseObj: {friendList: string[]} = {
-      friendList: await Friend.read(dbClient, email),
+      friendList: await Friend.readFriendEmailList(dbClient, email),
     };
 
     res.status(200).json(friendListResponseObj);
