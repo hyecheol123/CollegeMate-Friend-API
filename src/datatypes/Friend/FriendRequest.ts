@@ -23,18 +23,15 @@ export default class FriendRequest {
 
   /**
    * Create a new friend request and save it to the database
+   *
    * @param {Cosmos.Database} dbClient Cosmos DB Client
-   * @param {string} from id of the user who sent the friend request
-   * @param {string} to id of the user to whom the friend request is being sent
+   * @param {FriendRequest} friendRequest new friendRequest Object to be created
    */
-  static async createRequest(
+  static async create(
     dbClient: Cosmos.Database,
-    from: string,
-    to: string
+    friendRequest: FriendRequest
   ): Promise<void> {
-    const id = ServerConfig.hash(`${from}/${to}`, from, to);
-    const createdAt = new Date();
-    const friendRequest = new FriendRequest(id, from, to, createdAt);
+    friendRequest.createdAt = (friendRequest.createdAt as Date).toISOString();
     await dbClient.container(FRIEND_REQUEST).items.create(friendRequest);
   }
 

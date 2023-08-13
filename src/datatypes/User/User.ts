@@ -1,22 +1,21 @@
 /**
- * Define type of User
+ * Define type of User (Profile)
  *
- * @author Jeonghyeon Park <fishbox0923@gmail.com>
+ * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  */
 
 export default interface User {
-  id: string;
+  email: string;
   nickname: string;
-  searchTerm: string;
   lastLogin: Date | string;
   signUpDate: Date | string;
   nicknameChanged: Date | string;
+  deleted: boolean;
+  deletedAt?: Date | string;
+  locked: boolean;
+  lockedDescription?: string;
+  lockedAt?: Date | string;
   major: string;
   graduationYear: number;
   tncVersion: string;
-  deleted: boolean;
-  locked: boolean;
-  deletedAt?: Date | string;
-  lockedDescription?: string;
-  lockedAt?: Date | string;
 }

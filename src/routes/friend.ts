@@ -13,7 +13,7 @@ import AuthToken from '../datatypes/Token/AuthToken';
 import Friend from '../datatypes/Friend/Friend';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
 import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
-import getUser from '../datatypes/User/getUser';
+import getUserProfile from '../datatypes/User/getUserProfile';
 import BadRequestError from '../exceptions/BadRequestError';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
@@ -22,6 +22,7 @@ import ConflictError from '../exceptions/ConflictError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
+import ServerConfig from '../ServerConfig';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -129,40 +130,40 @@ friendRouter.post('/request', async (req, res, next) => {
       throw new UnauthenticatedError();
     }
 
-    // If the request body format is not valid
-    const friendRequest: {targetEmail: string} = req.body;
-    if (!validateSendFriendRequest(friendRequest)) {
+    // Check If the request body format is not valid
+    if (!validateSendFriendRequest(req.body)) {
       throw new BadRequestError();
     }
+    const toEmail = req.body.targetEmail;
+    const fromEmail = tokenContents.id;
 
-    const yourEmail = req.body.targetEmail;
-    const myEmail = tokenContents.id;
+    // Check for target user eligibility
+    todo();
 
-    // Read FRIEND database
-    const friendList = await Friend.read(dbClient, myEmail);
-
-    // If they are already friend
+    // Check for already existing friend
+    const friendList = await Friend.read(dbClient, fromEmail);
     for (let index = 0; index < friendList.length; index++) {
-      if (friendList[index] === yourEmail) {
+      if (friendList[index] === toEmail) {
         throw new ConflictError();
       }
     }
 
-    try {
-      // API call - verify User
-      const encodedEmail = Buffer.from(`${yourEmail}`, 'utf-8').toString(
-        'base64url'
-      );
-      await getUser(req, encodedEmail);
-    } catch (e) {
-      if (e instanceof Cosmos.ErrorResponse && e.status === 404) {
-        throw new NotFoundError();
-      } else {
-        throw e;
-      }
-    }
+    // Check for already existing friend request
+    todo();
 
-    await FriendRequest.createRequest(dbClient, myEmail, yourEmail);
+    // DB Operation
+    const requestCreatedDate = new Date();
+    const friendRequest = new FriendRequest(
+      ServerConfig.hash(
+        `${fromEmail}/${toEmail}/${requestCreatedDate.toISOString()}`,
+        fromEmail,
+        toEmail
+      ),
+      fromEmail,
+      toEmail,
+      requestCreatedDate
+    );
+    await FriendRequest.create(dbClient, friendRequest);
 
     res.status(201).send();
   } catch (e) {
