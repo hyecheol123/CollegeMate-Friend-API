@@ -168,7 +168,7 @@ describe('DELETE /friend/{base64Email} - Unfriend', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Fail - Wrong Parameter', async () => {
+  test('Fail - Invalid Email Format', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     // Wrong parameter type
@@ -215,39 +215,16 @@ describe('DELETE /friend/{base64Email} - Unfriend', () => {
     expect(response.status).toBe(200);
 
     // DB check read emails
-    let friendList: string[] = [];
-    type FriendInfo = {email: string};
-    friendList = friendList.concat(
-      (
-        await testEnv.dbClient
-          .container(FRIEND)
-          .items.query<FriendInfo>({
-            query: `SELECT f.email1 AS email FROM ${FRIEND} f WHERE f.email2 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: 'steve@wisc.edu',
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources.map(friend => friend.email)
-    );
-    friendList = friendList.concat(
-      (
-        await testEnv.dbClient
-          .container(FRIEND)
-          .items.query<FriendInfo>({
-            query: `SELECT f.email2 AS email FROM ${FRIEND} f WHERE f.email1 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: 'steve@wisc.edu',
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources.map(friend => friend.email)
+    let friendList = (
+      await testEnv.dbClient
+        .container(FRIEND)
+        .items.query({
+          query: `SELECT f.email1, f.email2 FROM ${FRIEND} AS f WHERE f.email1=@email OR f.email2=@email`,
+          parameters: [{name: '@email', value: 'steve@wisc.edu'}],
+        })
+        .fetchAll()
+    ).resources.map(friend =>
+      friend.email1 === 'steve@wisc.edu' ? friend.email2 : friend.email1
     );
 
     expect(friendList).toHaveLength(2);
@@ -264,38 +241,16 @@ describe('DELETE /friend/{base64Email} - Unfriend', () => {
     expect(response.status).toBe(200);
 
     // DB check
-    friendList = [];
-    friendList = friendList.concat(
-      (
-        await testEnv.dbClient
-          .container(FRIEND)
-          .items.query<FriendInfo>({
-            query: `SELECT f.email1 AS email FROM ${FRIEND} f WHERE f.email2 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: 'jerry@wisc.edu',
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources.map(friend => friend.email)
-    );
-    friendList = friendList.concat(
-      (
-        await testEnv.dbClient
-          .container(FRIEND)
-          .items.query<FriendInfo>({
-            query: `SELECT f.email2 AS email FROM ${FRIEND} f WHERE f.email1 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: 'jerry@wisc.edu',
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources.map(friend => friend.email)
+    friendList = (
+      await testEnv.dbClient
+        .container(FRIEND)
+        .items.query({
+          query: `SELECT f.email1, f.email2 FROM ${FRIEND} AS f WHERE f.email1=@email OR f.email2=@email`,
+          parameters: [{name: '@email', value: 'jerry@wisc.edu'}],
+        })
+        .fetchAll()
+    ).resources.map(friend =>
+      friend.email1 === 'jerry@wisc.edu' ? friend.email2 : friend.email1
     );
 
     expect(friendList).toHaveLength(1);

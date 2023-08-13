@@ -34,7 +34,7 @@ export default class Friend {
     this.since = since;
   }
 
-  /*
+  /**
    * Get list of all friends of a user
    *
    * @param dbClient Cosmos DB client
@@ -78,6 +78,7 @@ export default class Friend {
     try {
       await dbClient.container(FRIEND).item(id).delete();
     } catch (e) {
+      /* istanbul ignore else */
       if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
         throw new NotFoundError();
       } else {
