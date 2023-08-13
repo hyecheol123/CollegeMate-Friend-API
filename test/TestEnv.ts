@@ -17,7 +17,7 @@ import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
 import Friend from '../src/datatypes/Friend/Friend';
-import FriendRequest from '../src/datatypes/Friend/FriendRequest';
+import FriendRequest from '../src/datatypes/FriendRequest/FriendRequest';
 
 /**
  * Class for Test Environment
