@@ -1,7 +1,7 @@
 /**
- * Verifying Access Token (JSON Web Token)*
- * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
+ * Verifying Access Token (JSON Web Token)
  *
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 import * as jwt from 'jsonwebtoken';
@@ -9,12 +9,12 @@ import AuthToken, {JWTObject} from '../../datatypes/Token/AuthToken';
 import ForbiddenError from '../../exceptions/ForbiddenError';
 
 /**
-  * Method to verify AccessToken*
-  @param {string} accessToken JWT accessToken
-  @param {string} jwtAccessKey JWT access secret
-  @return {AuthToken} authentication token conten
-  */
-
+ * Method to verify AccessToken
+ *
+ * @param {string} accessToken JWT accessToken
+ * @param {string} jwtAccessKey JWT access secret
+ * @return {AuthToken} authentication token content
+ */
 export default function verifyAccessToken(
   accessToken: string,
   jwtAccessKey: string

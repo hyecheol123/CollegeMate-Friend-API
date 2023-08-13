@@ -1,26 +1,58 @@
 /**
  * Express Router middeware for Friend APIs
  *
- * @author Hyecheol (Jerry) Jang
+ * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Seok-hee (Steve) Han <seokheehan01@gmail.com>
  * @author Jeonghyeon Park  <fishbox0923@gmail.com>
  */
 
 import * as express from 'express';
 import * as Cosmos from '@azure/cosmos';
+import Friend from '../datatypes/Friend/Friend';
+import FriendRequest from '../datatypes/Friend/FriendRequest';
+import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
 import AuthToken from '../datatypes/Token/AuthToken';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
-import FriendRequest from '../datatypes/Friend/FriendRequest';
-import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
 
 // Path: /friend
 const friendRouter = express.Router();
 
 // GET: /friend
-// friendRouter.get('/', async (req, res, next) => {
-//   // TODO;
-// });
+friendRouter.get('/', async (req, res, next) => {
+  const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+  try {
+    // Check Origin header or application key
+    if (
+      req.header('Origin') !== req.app.get('webpageOrigin') &&
+      !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+    ) {
+      throw new ForbiddenError();
+    }
+
+    // Header check - access token
+    const accessToken = req.header('X-ACCESS-TOKEN');
+    if (accessToken === undefined) {
+      throw new UnauthenticatedError();
+    }
+    const tokenContents = verifyAccessToken(
+      accessToken,
+      req.app.get('jwtAccessKey')
+    );
+
+    // DB Operation - get list of friends
+    const email = tokenContents.id;
+    const friendListResponseObj: {friendList: string[]} = {
+      friendList: await Friend.read(dbClient, email),
+    };
+
+    res.status(200).json(friendListResponseObj);
+  } catch (e) {
+    next(e);
+  }
+});
 
 // DELETE: /friend/{base64Email}
 // friendRouter.delete('/:base64Email', async (req, res, next) => {
