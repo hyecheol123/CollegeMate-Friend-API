@@ -147,21 +147,51 @@ export default class TestEnv {
     const friendRequestSample: FriendRequest[] = [];
     friendRequestSample.push(
       {
-        id: 'sadf989hvsad93ikj',
+        id: TestConfig.hash(
+          `random@wisc.edu/steve@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'random@wisc.edu',
+          'steve@wisc.edu'
+        ),
         from: 'random@wisc.edu',
         to: 'steve@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        id: 'adsjbzvxn91fdsa',
+        id: TestConfig.hash(
+          `tedpowel123@wisc.edu/steve@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'tedpowel123@wisc.edu',
+          'steve@wisc.edu'
+        ),
         from: 'tedpowel123@wisc.edu',
         to: 'steve@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       },
       {
-        id: 'adsjbzvxn91fds',
+        id: TestConfig.hash(
+          `dalcmap@wisc.edu/steve@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'dalcmap@wisc.edu',
+          'steve@wisc.edu'
+        ),
         from: 'dalcmap@wisc.edu',
         to: 'steve@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          `steve@wisc.edu/dickdick@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'steve@wisc.edu',
+          'dickdick@wisc.edu'
+        ),
+        from: 'steve@wisc.edu',
+        to: 'dickdick@wisc.edu',
         createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
       }
     );

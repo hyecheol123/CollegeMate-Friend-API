@@ -6,7 +6,7 @@
 
 import * as Cosmos from '@azure/cosmos';
 
-const FRIENDREQUEST = 'friendRequest';
+const FRIEND_REQUEST = 'friendRequest';
 
 export default class FriendRequest {
   id: string;
@@ -31,26 +31,14 @@ export default class FriendRequest {
     dbClient: Cosmos.Database,
     to: string
   ): Promise<FriendRequest[]> {
-    const friendRequests: FriendRequest[] = [];
-
-    const querySpec = {
-      query: `SELECT f.id, f['from'], f['to'], f.createdAt FROM ${FRIENDREQUEST} f WHERE f['to']=@to`,
-      parameters: [
-        {
-          name: '@to',
-          value: to,
-        },
-      ],
-    };
-    const dbOps = await dbClient
-      .container(FRIENDREQUEST)
-      .items.query(querySpec)
-      .fetchAll();
-
-    for (const item of dbOps.resources) {
-      friendRequests.push(item);
-    }
-
-    return friendRequests;
+    return (
+      await dbClient
+        .container(FRIEND_REQUEST)
+        .items.query({
+          query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE f.to=@to`,
+          parameters: [{name: '@to', value: to}],
+        })
+        .fetchAll()
+    ).resources;
   }
 }
