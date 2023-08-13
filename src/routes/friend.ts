@@ -12,9 +12,11 @@ import Friend from '../datatypes/Friend/Friend';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
 import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
 import AuthToken from '../datatypes/Token/AuthToken';
+import NotFoundError from '../exceptions/NotFoundError';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
+import {validateEmail} from '../functions/inputValidator/validateEmail';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -55,9 +57,47 @@ friendRouter.get('/', async (req, res, next) => {
 });
 
 // DELETE: /friend/{base64Email}
-// friendRouter.delete('/:base64Email', async (req, res, next) => {
-//   // TODO;
-// });
+friendRouter.delete('/:base64Email', async (req, res, next) => {
+  const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+  try {
+    // Check Origin header or application key
+    if (
+      req.header('Origin') !== req.app.get('webpageOrigin') &&
+      !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+    ) {
+      throw new ForbiddenError();
+    }
+
+    // Header check - access token
+    const accessToken = req.header('X-ACCESS-TOKEN');
+    if (accessToken === undefined) {
+      throw new UnauthenticatedError();
+    }
+    const tokenContents = verifyAccessToken(
+      accessToken,
+      req.app.get('jwtAccessKey')
+    );
+
+    // Parameter check if received
+    const requestUserEmail = Buffer.from(
+      req.params.base64Email,
+      'base64url'
+    ).toString('utf8');
+
+    if (!validateEmail(requestUserEmail)) {
+      throw new NotFoundError();
+    }
+
+    // DB Operation - delete requested friend
+    const email = tokenContents.id;
+    await Friend.delete(dbClient, email, requestUserEmail);
+
+    res.status(200).send();
+  } catch (e) {
+    next(e);
+  }
+});
 
 // POST: /friend/request
 // friendRouter.post('/request', async (req, res, next) => {
