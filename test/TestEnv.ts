@@ -71,10 +71,6 @@ export default class TestEnv {
         includedPaths: [{path: '/*'}],
         excludedPaths: [{path: '/since/?'}],
       },
-      uniqueKeyPolicy: {
-        // email1 and email2 should be in alphabetical order
-        uniqueKeys: [{paths: ['/email1', '/email2']}],
-      },
     });
     /* istanbul ignore next */
     if (containerOps.statusCode !== 201) {
@@ -89,11 +85,7 @@ export default class TestEnv {
         indexingMode: 'consistent',
         automatic: true,
         includedPaths: [{path: '/*'}],
-        excludedPaths: [
-          {path: '/from/?'},
-          {path: '/to/?'},
-          {path: '/createdAt/?'},
-        ],
+        excludedPaths: [{path: '/createdAt/?'}],
       },
     });
     /* istanbul ignore next */
