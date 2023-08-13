@@ -8,12 +8,14 @@
  *  - Remove used table and close database connection from the express server
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 import * as crypto from 'crypto';
 import * as Cosmos from '@azure/cosmos';
 import TestConfig from './TestConfig';
 import ExpressServer from '../src/ExpressServer';
+import Friend from '../src/datatypes/Friend/Friend';
 
 /**
  * Class for Test Environment
@@ -76,7 +78,54 @@ export default class TestEnv {
     if (containerOps.statusCode !== 201) {
       throw new Error(JSON.stringify(containerOps));
     }
-    // TODO: Create a new friend entry
+    // Create a new friend entries
+    const friendSample: Friend[] = [];
+    friendSample.push(
+      {
+        id: TestConfig.hash(
+          'jeonghyeon@wisc.edu/steve@wisc.edu',
+          'jeonghyeon@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        email1: 'jeonghyeon@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date().toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'drag@wisc.edu/jerry@wisc.edu',
+          'drag@wisc.edu',
+          'jerry@wisc.edu'
+        ),
+        email1: 'drag@wisc.edu',
+        email2: 'jerry@wisc.edu',
+        since: new Date().toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'jerry@wisc.edu/steve@wisc.edu',
+          'jerry@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        email1: 'jerry@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date().toISOString(),
+      },
+      {
+        id: TestConfig.hash(
+          'daekyun@wisc.edu/steve@wisc.edu',
+          'daekyun@wisc.edu',
+          'steve@wisc.edu'
+        ),
+        email1: 'daekyun@wisc.edu',
+        email2: 'steve@wisc.edu',
+        since: new Date().toISOString(),
+      }
+    );
+
+    for (let index = 0; index < friendSample.length; index++) {
+      await this.dbClient.container('friend').items.create(friendSample[index]);
+    }
 
     // friend request container
     containerOps = await this.dbClient.containers.create({
