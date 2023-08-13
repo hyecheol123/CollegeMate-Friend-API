@@ -1,16 +1,16 @@
 /**
  * Express Router middeware for Friend APIs
  *
- * @author Hyecheol (Jerry) Jang
+ * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  * @author Seok-hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 import * as express from 'express';
 import * as Cosmos from '@azure/cosmos';
+import Friend from '../datatypes/Friend/Friend';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
-import Friend from '../datatypes/Friend/Friend';
 
 // Path: /friend
 const friendRouter = express.Router();

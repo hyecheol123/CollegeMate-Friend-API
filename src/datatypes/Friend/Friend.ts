@@ -1,6 +1,7 @@
 /**
- * Define type and CRUD methods for each user entry
+ * Define type and CRUD methods for each friend entry
  *
+ * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 import * as Cosmos from '@azure/cosmos';
@@ -42,43 +43,16 @@ export default class Friend {
     dbClient: Cosmos.Database,
     email: string
   ): Promise<string[]> {
-    let friendList: string[] = [];
-    type FriendInfo = {email: string};
-
-    // Query that returns all friends of a user
-    friendList = friendList.concat(
-      (
-        await dbClient
-          .container(FRIEND)
-          .items.query<FriendInfo>({
-            query: `SELECT f.email1 AS email FROM ${FRIEND} f WHERE f.email2 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: email,
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources.map(friend => friend.email)
+    return (
+      await dbClient
+        .container(FRIEND)
+        .items.query({
+          query: `SELECT f.email1, f.email2 FROM ${FRIEND} AS f WHERE f.email1=@email OR f.email2=@email`,
+          parameters: [{name: '@email', value: email}],
+        })
+        .fetchAll()
+    ).resources.map(friend =>
+      friend.email1 === email ? friend.email2 : friend.email1
     );
-    friendList = friendList.concat(
-      (
-        await dbClient
-          .container(FRIEND)
-          .items.query<FriendInfo>({
-            query: `SELECT f.email2 AS email FROM ${FRIEND} f WHERE f.email1 = @email`,
-            parameters: [
-              {
-                name: '@email',
-                value: email,
-              },
-            ],
-          })
-          .fetchAll()
-      ).resources.map(friend => friend.email)
-    );
-
-    return friendList;
   }
 }

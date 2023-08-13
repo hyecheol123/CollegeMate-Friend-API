@@ -89,7 +89,7 @@ export default class TestEnv {
         ),
         email1: 'jeonghyeon@wisc.edu',
         email2: 'steve@wisc.edu',
-        since: new Date(),
+        since: new Date().toISOString(),
       },
       {
         id: TestConfig.hash(
@@ -99,7 +99,7 @@ export default class TestEnv {
         ),
         email1: 'drag@wisc.edu',
         email2: 'jerry@wisc.edu',
-        since: new Date(),
+        since: new Date().toISOString(),
       },
       {
         id: TestConfig.hash(
@@ -109,7 +109,7 @@ export default class TestEnv {
         ),
         email1: 'jerry@wisc.edu',
         email2: 'steve@wisc.edu',
-        since: new Date(),
+        since: new Date().toISOString(),
       },
       {
         id: TestConfig.hash(
@@ -119,7 +119,7 @@ export default class TestEnv {
         ),
         email1: 'daekyun@wisc.edu',
         email2: 'steve@wisc.edu',
-        since: new Date(),
+        since: new Date().toISOString(),
       }
     );
 
