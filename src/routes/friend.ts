@@ -12,6 +12,7 @@ import AuthToken from '../datatypes/Token/AuthToken';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import FriendRequest from '../datatypes/Friend/FriendRequest';
+import NotFoundError from '../exceptions/NotFoundError';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -66,20 +67,20 @@ friendRouter.delete(
       const friendRequestId = req.params.friendRequestId;
       const userEmail = tokenContents.id;
 
-      const userReceivedRequests: FriendRequest[] =
-        await FriendRequest.readReceived(dbClient, userEmail);
+      // DB Operation - get friend request to check if it belongs to the user
+      const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
 
-      const canFound: boolean = userReceivedRequests.some(
-        (request: FriendRequest) => {
-          return (request.id === friendRequestId);
-        }
-      );
+      if (friendRequest === undefined) {
+        throw new NotFoundError();
+      }
 
-      if (!canFound) {
+      if (friendRequest.to !== userEmail) {
         throw new ForbiddenError();
       }
 
       await FriendRequest.deleteReceived(dbClient, friendRequestId);
+
+      res.status(200).send();
     } catch (e) {
       next(e);
     }

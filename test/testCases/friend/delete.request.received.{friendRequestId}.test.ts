@@ -26,7 +26,8 @@ describe('POST /friend/request - Send Friend Request', () => {
     'invalid@wisc.edu',
     'requestid@wisc.edu'
   );
-  
+  const notFoundId = 'notfoundId';
+
   let testEnv: TestEnv;
 
   const accessTokenMap = {
@@ -197,13 +198,60 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Fail - Friend Request is not Found', async () => {
+  test('Fail - FriendRequest Not Found', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
-    
-    let response = await request(testEnv.expressServer.app)
+
+    const response = await request(testEnv.expressServer.app)
+      .delete(`/friend/request/received/${notFoundId}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+  });
+
+  test('Success from Web', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+    testEnv.dbClient = testEnv.dbClient as Cosmos.Database;
+
+    //from Web
+    const response = await request(testEnv.expressServer.app)
       .delete(`/friend/request/received/${validFriendRequestId}`)
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(200);
+
+    // DB check read emails
+    const dbOps = await testEnv.dbClient
+      .container(FRIENDREQUEST)
+      .items.query('SELECT * FROM c')
+      .fetchAll();
+
+    expect(dbOps.resources).toHaveLength(3);
+    expect(dbOps.resources[0].from).not.toBe('jeonghyeon@wisc.edu');
+    expect(dbOps.resources[1].from).not.toBe('jeonghyeon@wisc.edu');
+    expect(dbOps.resources[2].from).not.toBe('jeonghyeon@wisc.edu');
+  });
+
+  test('Success from App', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+    testEnv.dbClient = testEnv.dbClient as Cosmos.Database;
+
+    //from Web
+    const response = await request(testEnv.expressServer.app)
+      .delete(`/friend/request/received/${validFriendRequestId}`)
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({'X-APPLICATION-KEY': '<Android-App-v1>'});
+    expect(response.status).toBe(200);
+
+    // DB check read emails
+    const dbOps = await testEnv.dbClient
+      .container(FRIENDREQUEST)
+      .items.query('SELECT * FROM c')
+      .fetchAll();
+
+    expect(dbOps.resources).toHaveLength(3);
+    expect(dbOps.resources[0].from).not.toBe('jeonghyeon@wisc.edu');
+    expect(dbOps.resources[1].from).not.toBe('jeonghyeon@wisc.edu');
+    expect(dbOps.resources[2].from).not.toBe('jeonghyeon@wisc.edu');
   });
 });
