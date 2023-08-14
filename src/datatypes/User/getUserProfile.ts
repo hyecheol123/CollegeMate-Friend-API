@@ -56,7 +56,6 @@ export default async function getUserProfile(
   // Found requested user
   const userProfileInfo = await response.json();
   return {
-    email: email,
     nickname: userProfileInfo.nickname,
     lastLogin: new Date(userProfileInfo.lastLogin),
     signUpDate: new Date(userProfileInfo.signUpDate),

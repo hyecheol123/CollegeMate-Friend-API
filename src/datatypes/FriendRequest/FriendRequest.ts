@@ -2,9 +2,11 @@
  * Define type and used CRUD methods for friend request
  *
  * @author Jeonghyeon Park <fishbox0923@gmail.com>
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 import * as Cosmos from '@azure/cosmos';
+import NotFoundError from '../../exceptions/NotFoundError';
 
 const FRIEND_REQUEST = 'friendRequest';
 
@@ -76,5 +78,33 @@ export default class FriendRequest {
         })
         .fetchAll()
     ).resources;
+  }
+
+  /**
+   * Check if friend request exists
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} fromEmail email of sender
+   * @param {string} toEmail email of receiver
+   * @returns {boolean} friend request object - true if exists, false if not
+   */
+  static async checkExistingRequest(
+    dbClient: Cosmos.Database,
+    fromEmail: string,
+    toEmail: string
+  ): Promise<boolean> {
+    return (
+      (
+        await dbClient
+          .container(FRIEND_REQUEST)
+          .items.query({
+            query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE (f["from"]=@email1 AND f.to=@emai2) OR (f["from"]=@email2 AND f.to=@emai1)`,
+            parameters: [
+              {name: '@email1', value: fromEmail},
+              {name: '@email2', value: toEmail},
+            ],
+          })
+          .fetchAll()
+      ).resources.length > 0
+    );
   }
 }

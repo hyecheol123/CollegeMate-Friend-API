@@ -2,10 +2,10 @@
  * Define type of User (Profile)
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
  */
 
 export default interface User {
-  email: string;
   nickname: string;
   lastLogin: Date | string;
   signUpDate: Date | string;

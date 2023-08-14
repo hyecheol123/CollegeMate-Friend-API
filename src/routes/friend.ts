@@ -23,6 +23,7 @@ import ConflictError from '../exceptions/ConflictError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
+import HTTPError from '../exceptions/HTTPError';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -154,8 +155,9 @@ friendRouter.post('/request', async (req, res, next) => {
     let friendRelation: Friend | undefined;
     try {
       friendRelation = await Friend.read(dbClient, friendRelationId);
+      throw new ConflictError();
     } catch (e) {
-      if (!(e instanceof NotFoundError)) {
+      if ((e as HTTPError).statusCode !== 404) {
         throw e;
       }
     }
@@ -164,16 +166,22 @@ friendRouter.post('/request', async (req, res, next) => {
     }
 
     // Check for already existing friend request (Check both way)
-    todo();
+    if (
+      await FriendRequest.checkExistingRequest(dbClient, fromEmail, toEmail)
+    ) {
+      throw new ConflictError();
+    }
+
+    const requestCreatedDate = new Date();
+    const friendRequestId = ServerConfig.hash(
+      `${fromEmail}/${toEmail}/${requestCreatedDate.toISOString()}`,
+      fromEmail,
+      toEmail
+    );
 
     // DB Operation
-    const requestCreatedDate = new Date();
     const friendRequest = new FriendRequest(
-      ServerConfig.hash(
-        `${fromEmail}/${toEmail}/${requestCreatedDate.toISOString()}`,
-        fromEmail,
-        toEmail
-      ),
+      friendRequestId,
       fromEmail,
       toEmail,
       requestCreatedDate

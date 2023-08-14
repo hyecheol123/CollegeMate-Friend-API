@@ -15,7 +15,7 @@ import AuthToken from '../../../src/datatypes/Token/AuthToken';
 import ServerConfig from '../../../src/ServerConfig';
 
 describe('POST /friend/request - Send Friend Request', () => {
-  const FRIENDREQUEST = 'friendRequest';
+  const FRIEND_REQUEST = 'friendRequest';
   let testEnv: TestEnv;
 
   const accessTokenMap = {
@@ -199,7 +199,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
       .send({
-        targetEmail: 'drag@wisc.edu',
+        targetEmail: 'daekyun@wisc.edu',
       });
     expect(response.status).toBe(409);
     expect(response.body.error).toBe('Conflict');
@@ -255,17 +255,25 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.status).toBe(201);
 
     // Check if the friend request data is in database
-    const from = 'steve@wisc.edu';
-    const to = 'park@wisc.edu';
-    const id = ServerConfig.hash(`${from}/${to}`, from, to);
-    const dbQuery = await testEnv.dbClient
-      .container(FRIENDREQUEST)
-      .item(id)
-      .read();
-    expect(dbQuery.resource.id).toBe(id);
-    expect(dbQuery.resource.from).toBe('steve@wisc.edu');
-    expect(dbQuery.resource.to).toBe('park@wisc.edu');
-    expect(new Date(dbQuery.resource.createAt)).toBeInstanceOf(Date);
+    const dbOps = await testEnv.dbClient
+      .container(FRIEND_REQUEST)
+      .items.query({
+        query: `SELECT * FROM ${FRIEND_REQUEST} AS f WHERE f["from"] = @from AND f.to = @to`,
+        parameters: [
+          {
+            name: '@from',
+            value: 'steve@wisc.edu',
+          },
+          {
+            name: '@to',
+            value: 'park@wisc.edu',
+          },
+        ],
+      })
+      .fetchAll();
+    expect(dbOps.resources).toHaveLength(1);
+    expect(dbOps.resources[0].from).toBe('steve@wisc.edu');
+    expect(dbOps.resources[0].to).toBe('park@wisc.edu');
   });
 
   test('Success from app', async () => {
@@ -283,16 +291,24 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.status).toBe(201);
 
     // Check if the friend request data is in database
-    const from = 'steve@wisc.edu';
-    const to = 'park@wisc.edu';
-    const id = ServerConfig.hash(`${from}/${to}`, from, to);
-    const dbQuery = await testEnv.dbClient
-      .container(FRIENDREQUEST)
-      .item(id)
-      .read();
-    expect(dbQuery.resource.id).toBe(id);
-    expect(dbQuery.resource.from).toBe('steve@wisc.edu');
-    expect(dbQuery.resource.to).toBe('park@wisc.edu');
-    expect(new Date(dbQuery.resource.createAt)).toBeInstanceOf(Date);
+    const dbOps = await testEnv.dbClient
+      .container(FRIEND_REQUEST)
+      .items.query({
+        query: `SELECT * FROM ${FRIEND_REQUEST} AS f WHERE f["from"] = @from AND f.to = @to`,
+        parameters: [
+          {
+            name: '@from',
+            value: 'steve@wisc.edu',
+          },
+          {
+            name: '@to',
+            value: 'park@wisc.edu',
+          },
+        ],
+      })
+      .fetchAll();
+    expect(dbOps.resources).toHaveLength(1);
+    expect(dbOps.resources[0].from).toBe('steve@wisc.edu');
+    expect(dbOps.resources[0].to).toBe('park@wisc.edu');
   });
 });

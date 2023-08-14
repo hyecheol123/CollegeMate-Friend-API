@@ -85,16 +85,6 @@ export default class TestEnv {
     friendSample.push(
       {
         id: TestConfig.hash(
-          'steve@wisc.edu/drag@wisc.edu',
-          'steve@wisc.edu',
-          'drag@wisc.edu'
-        ),
-        email1: 'steve@wisc.edu',
-        email2: 'drag@wisc.edu',
-        since: new Date('2023-02-10T00:50:43.000Z').toISOString(),
-      },
-      {
-        id: TestConfig.hash(
           'jeonghyeon@wisc.edu/steve@wisc.edu',
           'jeonghyeon@wisc.edu',
           'steve@wisc.edu'
