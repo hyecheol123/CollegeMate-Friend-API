@@ -13,6 +13,7 @@ import TestEnv from '../../TestEnv';
 import ExpressServer from '../../../src/ExpressServer';
 import AuthToken from '../../../src/datatypes/Token/AuthToken';
 import ServerConfig from '../../../src/ServerConfig';
+import FriendRequest from '../../../src/datatypes/FriendRequest/FriendRequest';
 
 describe('POST /friend/request - Send Friend Request', () => {
   const FRIEND_REQUEST = 'friendRequest';
@@ -238,6 +239,117 @@ describe('POST /friend/request - Send Friend Request', () => {
       });
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('Bad Request');
+  });
+
+  test('Fail - Existing Request', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // existing request from web
+    let response = await request(testEnv.expressServer.app)
+      .post('/friend/request')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'})
+      .send({
+        targetEmail: 'dickdick@wisc.edu',
+      });
+    expect(response.status).toBe(409);
+    expect(response.body.error).toBe('Conflict');
+
+    // existing request from web - other way around
+    response = await request(testEnv.expressServer.app)
+      .post('/friend/request')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'})
+      .send({
+        targetEmail: 'dalcmap@wisc.edu',
+      });
+    expect(response.status).toBe(409);
+    expect(response.body.error).toBe('Conflict');
+  });
+
+  test('Fail - Locked or Deleted', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+    testEnv.dbClient = testEnv.dbClient as Cosmos.Database;
+
+    // Create a new friend request entry
+    const friendRequestSample: FriendRequest[] = [];
+    friendRequestSample.push(
+      {
+        id: ServerConfig.hash(
+          `steve@wisc.edu/locked@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'steve@wisc.edu',
+          'locked@wisc.edu'
+        ),
+        from: 'park@wisc.edu',
+        to: 'locked@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: ServerConfig.hash(
+          `steve@wisc.edu/deleted@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'steve@wisc.edu',
+          'deleted@wisc.edu'
+        ),
+        from: 'steve@wisc.edu',
+        to: 'deleted@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      },
+      {
+        id: ServerConfig.hash(
+          `steve@wisc.edu/lockedAndDeleted@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'steve@wisc.edu',
+          'lockedAndDeleted@wisc.edu'
+        ),
+        from: 'steve@wisc.edu',
+        to: 'lockedAndDeleted@wisc.edu',
+        createdAt: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+      }
+    );
+
+    for (let index = 0; index < friendRequestSample.length; index++) {
+      await testEnv.dbClient
+        .container('friendRequest')
+        .items.create(friendRequestSample[index]);
+    }
+
+    // Request to locked user
+    let response = await request(testEnv.expressServer.app)
+      .post('/friend/request')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'})
+      .send({
+        targetEmail: 'locked@wisc.edu',
+      });
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+
+    // Request to deleted user
+    response = await request(testEnv.expressServer.app)
+      .post('/friend/request')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'})
+      .send({
+        targetEmail: 'deleted@wisc.edu',
+      });
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+
+    // Request to locked and deleted user
+    response = await request(testEnv.expressServer.app)
+      .post('/friend/request')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'})
+      .send({
+        targetEmail: 'lockedAndDeleted@wisc.edu',
+      });
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
   });
 
   test('Success from web', async () => {

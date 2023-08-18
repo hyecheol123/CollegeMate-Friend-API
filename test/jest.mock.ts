@@ -44,6 +44,76 @@ jest.mock('../src/datatypes/User/getUserProfile', () => ({
         };
         return returnValue;
 
+      case 'dickdick@wisc.edu':
+        returnValue = {
+          nickname: 'dickdick',
+          lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+          signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          deleted: false,
+          locked: false,
+          major: 'Electrical Engineering',
+          graduationYear: 2023,
+          tncVersion: 'v1.0.2',
+        };
+        return returnValue;
+
+      case 'dalcmap@wisc.edu':
+        returnValue = {
+          nickname: 'dalcmap',
+          lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+          signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          deleted: false,
+          locked: false,
+          major: 'Computer Science',
+          graduationYear: 2023,
+          tncVersion: 'v1.0.2',
+        };
+        return returnValue;
+
+        case 'locked@wisc.edu':
+          returnValue = {
+            nickname: 'locked',
+            lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+            signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+            nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+            deleted: false,
+            locked: true,
+            major: 'Animal Science',
+            graduationYear: 2023,
+            tncVersion: 'v1.0.2',
+          };
+          return returnValue;
+
+        case 'deleted@wisc.edu':
+          returnValue = {
+            nickname: 'deleted',
+            lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+            signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+            nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+            deleted: true,
+            locked: false,
+            major: 'Chemistry',
+            graduationYear: 2023,
+            tncVersion: 'v1.0.2',
+          };
+          return returnValue;
+
+        case 'lockedAndDeleted@wisc.edu':
+          returnValue = {
+            nickname: 'lockedAndDeleted',
+            lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+            signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+            nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+            deleted: true,
+            locked: true,
+            major: 'Animal Science',
+            graduationYear: 2023,
+            tncVersion: 'v1.0.2',
+          };
+          return returnValue;
+
       default:
         throw new NotFoundError();
     }

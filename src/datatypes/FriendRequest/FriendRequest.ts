@@ -92,12 +92,13 @@ export default class FriendRequest {
     fromEmail: string,
     toEmail: string
   ): Promise<boolean> {
+    console.log(fromEmail, toEmail);
     return (
       (
         await dbClient
           .container(FRIEND_REQUEST)
           .items.query({
-            query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE (f["from"]=@email1 AND f.to=@emai2) OR (f["from"]=@email2 AND f.to=@emai1)`,
+            query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE f["from"]=@email1 AND f.to=@email2 OR f["from"]=@email2 AND f.to=@email1`,
             parameters: [
               {name: '@email1', value: fromEmail},
               {name: '@email2', value: toEmail},
