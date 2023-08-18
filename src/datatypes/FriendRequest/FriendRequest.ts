@@ -6,7 +6,6 @@
  */
 
 import * as Cosmos from '@azure/cosmos';
-import NotFoundError from '../../exceptions/NotFoundError';
 
 const FRIEND_REQUEST = 'friendRequest';
 
