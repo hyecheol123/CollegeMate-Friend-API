@@ -8,15 +8,22 @@
 
 import * as express from 'express';
 import * as Cosmos from '@azure/cosmos';
+import {Buffer} from 'node:buffer';
+import ServerConfig from '../ServerConfig';
 import AuthToken from '../datatypes/Token/AuthToken';
 import Friend from '../datatypes/Friend/Friend';
-import FriendRequest from '../datatypes/Friend/FriendRequest';
-import FriendRequestGetResponseObj from '../datatypes/Friend/FriendRequestGetResponseObj';
+import FriendRequest from '../datatypes/FriendRequest/FriendRequest';
+import FriendRequestGetResponseObj from '../datatypes/FriendRequest/FriendRequestGetResponseObj';
+import getUserProfile from '../datatypes/User/getUserProfile';
+import BadRequestError from '../exceptions/BadRequestError';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
 import NotFoundError from '../exceptions/NotFoundError';
+import ConflictError from '../exceptions/ConflictError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
+import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
+import HTTPError from '../exceptions/HTTPError';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -100,9 +107,92 @@ friendRouter.delete('/:base64Email', async (req, res, next) => {
 });
 
 // POST: /friend/request
-// friendRouter.post('/request', async (req, res, next) => {
-//   // TODO;
-// });
+friendRouter.post('/request', async (req, res, next) => {
+  const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+  try {
+    // Check Origin header or application key
+    if (
+      req.header('Origin') !== req.app.get('webpageOrigin') &&
+      !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+    ) {
+      throw new ForbiddenError();
+    }
+
+    // Check access token
+    let tokenContents: AuthToken | undefined = undefined;
+    const accessToken = req.header('X-ACCESS-TOKEN');
+    if (accessToken !== undefined) {
+      tokenContents = verifyAccessToken(
+        accessToken,
+        req.app.get('jwtAccessKey')
+      );
+    } else {
+      throw new UnauthenticatedError();
+    }
+
+    // Check If the request body format is not valid
+    if (!validateSendFriendRequest(req.body)) {
+      throw new BadRequestError();
+    }
+    const toEmail = req.body.targetEmail;
+    const fromEmail = tokenContents.id;
+
+    // Check for target user eligibility
+    const userProfile = await getUserProfile(toEmail, req);
+    if (userProfile.deleted || userProfile.locked) {
+      throw new NotFoundError();
+    }
+
+    // Check for already existing friend
+    const email1 = fromEmail < toEmail ? fromEmail : toEmail;
+    const email2 = fromEmail < toEmail ? toEmail : fromEmail;
+    const friendRelationId = ServerConfig.hash(
+      `${email1}/${email2}`,
+      email1,
+      email2
+    );
+    let friendRelation: Friend | undefined;
+    try {
+      friendRelation = await Friend.read(dbClient, friendRelationId);
+    } catch (e) {
+      /* istanbul ignore if */
+      if ((e as HTTPError).statusCode !== 404) {
+        throw e;
+      }
+    }
+    if (friendRelation !== undefined) {
+      throw new ConflictError();
+    }
+
+    // Check for already existing friend request (Check both way)
+    if (
+      await FriendRequest.readCheckExistingRequest(dbClient, fromEmail, toEmail)
+    ) {
+      throw new ConflictError();
+    }
+
+    const requestCreatedDate = new Date();
+    const friendRequestId = ServerConfig.hash(
+      `${fromEmail}/${toEmail}/${requestCreatedDate.toISOString()}`,
+      fromEmail,
+      toEmail
+    );
+
+    // DB Operation
+    const friendRequest = new FriendRequest(
+      friendRequestId,
+      fromEmail,
+      toEmail,
+      requestCreatedDate
+    );
+    await FriendRequest.create(dbClient, friendRequest);
+
+    res.status(201).send();
+  } catch (e) {
+    next(e);
+  }
+});
 
 // GET: /friend/request/received
 friendRouter.get('/request/received', async (req, res, next) => {
