@@ -15,14 +15,14 @@ import ForbiddenError from '../../exceptions/ForbiddenError';
  * @param {string} jwtAccessKey JWT access secret
  * @return {AuthToken} authentication token content
  */
-export default function verifyServerAdminToken(
-  serverAdminToken: string,
+export default function verifyAccessToken(
+  accessToken: string,
   jwtAccessKey: string
 ): AuthToken {
   let tokenContents: JWTObject;
   try {
     // Check token's validity and contents
-    tokenContents = jwt.verify(serverAdminToken, jwtAccessKey, {
+    tokenContents = jwt.verify(accessToken, jwtAccessKey, {
       algorithms: ['HS512'],
     }) as JWTObject;
   } catch (e) {
