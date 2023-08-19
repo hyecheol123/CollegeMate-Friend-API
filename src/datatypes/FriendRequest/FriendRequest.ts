@@ -86,25 +86,24 @@ export default class FriendRequest {
    * @param {string} toEmail email of receiver
    * @returns {boolean} friend request object - true if exists, false if not
    */
-  static async checkExistingRequest(
+  static async readCheckExistingRequest(
     dbClient: Cosmos.Database,
     fromEmail: string,
     toEmail: string
   ): Promise<boolean> {
-    console.log(fromEmail, toEmail);
     return (
       (
         await dbClient
           .container(FRIEND_REQUEST)
           .items.query({
-            query: `SELECT * FROM ${FRIEND_REQUEST} f WHERE f["from"]=@email1 AND f.to=@email2 OR f["from"]=@email2 AND f.to=@email1`,
+            query: `SELECT VALUE COUNT(f.id) FROM ${FRIEND_REQUEST} f WHERE f["from"]=@email1 AND f.to=@email2 OR f["from"]=@email2 AND f.to=@email1`,
             parameters: [
               {name: '@email1', value: fromEmail},
               {name: '@email2', value: toEmail},
             ],
           })
           .fetchAll()
-      ).resources.length > 0
+      ).resources[0] > 0
     );
   }
 }

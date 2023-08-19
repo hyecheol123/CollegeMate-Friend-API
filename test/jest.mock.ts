@@ -16,6 +16,34 @@ jest.mock('../src/datatypes/User/getUserProfile', () => ({
   default: jest.fn(async (email: string, req: Request) => {
     let returnValue: User;
     switch (email) {
+      case 'jeonghyeon@wisc.edu':
+        returnValue = {
+          nickname: 'jeonghyeon',
+          lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+          signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          deleted: false,
+          locked: false,
+          major: 'Computer Science',
+          graduationYear: 2024,
+          tncVersion: 'v1.0.2',
+        };
+        return returnValue;
+
+      case 'steve@wisc.edu':
+        returnValue = {
+          nickname: 'steve',
+          lastLogin: new Date('2023-03-10T00:50:43.000Z').toISOString(),
+          signUpDate: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          nicknameChanged: new Date('2023-02-10T00:50:43.000Z').toISOString(),
+          deleted: false,
+          locked: false,
+          major: 'Computer Science',
+          graduationYear: 2024,
+          tncVersion: 'v1.0.2',
+        };
+        return returnValue;
+
       case 'park@wisc.edu':
         returnValue = {
           nickname: 'park',

@@ -1,8 +1,9 @@
 /**
  * Jest unit test for POST /friend/request/ method
  *
+ * @author Seok-Hee (Steve) Han <seokheehan01@gmail.com>
+ * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  * @author Jeonghyeon Park <fishbox0923@gmail.com>
- *
  */
 
 // eslint-disable-next-line node/no-unpublished-import
@@ -184,9 +185,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'notFound@wisc.edu',
-      });
+      .send({targetEmail: 'notFound@wisc.edu'});
     expect(response.status).toBe(404);
     expect(response.body.error).toBe('Not Found');
   });
@@ -199,9 +198,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'daekyun@wisc.edu',
-      });
+      .send({targetEmail: 'daekyun@wisc.edu'});
     expect(response.status).toBe(409);
     expect(response.body.error).toBe('Conflict');
   });
@@ -222,9 +219,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        invalidPropertity: 'invalidValue',
-      });
+      .send({invalidPropertity: 'invalidValue'});
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('Bad Request');
 
@@ -241,6 +236,19 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.body.error).toBe('Bad Request');
   });
 
+  test('Fail - Already Friend', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // existing request from web
+    const response = await request(testEnv.expressServer.app)
+      .post('/friend/request')
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'})
+      .send({targetEmail: 'jeonghyeon@wisc.edu'});
+    expect(response.status).toBe(409);
+    expect(response.body.error).toBe('Conflict');
+  });
+
   test('Fail - Existing Request', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
@@ -249,9 +257,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'dickdick@wisc.edu',
-      });
+      .send({targetEmail: 'dickdick@wisc.edu'});
     expect(response.status).toBe(409);
     expect(response.body.error).toBe('Conflict');
 
@@ -260,9 +266,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'dalcmap@wisc.edu',
-      });
+      .send({targetEmail: 'dalcmap@wisc.edu'});
     expect(response.status).toBe(409);
     expect(response.body.error).toBe('Conflict');
   });
@@ -323,9 +327,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'locked@wisc.edu',
-      });
+      .send({targetEmail: 'locked@wisc.edu'});
     expect(response.status).toBe(404);
     expect(response.body.error).toBe('Not Found');
 
@@ -334,9 +336,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'deleted@wisc.edu',
-      });
+      .send({targetEmail: 'deleted@wisc.edu'});
     expect(response.status).toBe(404);
     expect(response.body.error).toBe('Not Found');
 
@@ -345,9 +345,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'lockedAndDeleted@wisc.edu',
-      });
+      .send({targetEmail: 'lockedAndDeleted@wisc.edu'});
     expect(response.status).toBe(404);
     expect(response.body.error).toBe('Not Found');
   });
@@ -361,9 +359,7 @@ describe('POST /friend/request - Send Friend Request', () => {
       .post('/friend/request')
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'})
-      .send({
-        targetEmail: 'park@wisc.edu',
-      });
+      .send({targetEmail: 'park@wisc.edu'});
     expect(response.status).toBe(201);
 
     // Check if the friend request data is in database
@@ -372,14 +368,8 @@ describe('POST /friend/request - Send Friend Request', () => {
       .items.query({
         query: `SELECT * FROM ${FRIEND_REQUEST} AS f WHERE f["from"] = @from AND f.to = @to`,
         parameters: [
-          {
-            name: '@from',
-            value: 'steve@wisc.edu',
-          },
-          {
-            name: '@to',
-            value: 'park@wisc.edu',
-          },
+          {name: '@from', value: 'steve@wisc.edu'},
+          {name: '@to', value: 'park@wisc.edu'},
         ],
       })
       .fetchAll();
@@ -393,13 +383,18 @@ describe('POST /friend/request - Send Friend Request', () => {
     testEnv.dbClient = testEnv.dbClient as Cosmos.Database;
 
     // valid request from app
+    // Generate AccessToken
     const response = await request(testEnv.expressServer.app)
       .post('/friend/request')
-      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({
+        'X-ACCESS-TOKEN': jwt.sign(
+          {id: 'park@wisc.edu', type: 'access', tokenType: 'user'},
+          testEnv.testConfig.jwt.secretKey,
+          {algorithm: 'HS512', expiresIn: '10m'}
+        ),
+      })
       .set({'X-APPLICATION-KEY': '<Android-App-v1>'})
-      .send({
-        targetEmail: 'park@wisc.edu',
-      });
+      .send({targetEmail: 'steve@wisc.edu'});
     expect(response.status).toBe(201);
 
     // Check if the friend request data is in database
@@ -408,19 +403,13 @@ describe('POST /friend/request - Send Friend Request', () => {
       .items.query({
         query: `SELECT * FROM ${FRIEND_REQUEST} AS f WHERE f["from"] = @from AND f.to = @to`,
         parameters: [
-          {
-            name: '@from',
-            value: 'steve@wisc.edu',
-          },
-          {
-            name: '@to',
-            value: 'park@wisc.edu',
-          },
+          {name: '@to', value: 'steve@wisc.edu'},
+          {name: '@from', value: 'park@wisc.edu'},
         ],
       })
       .fetchAll();
     expect(dbOps.resources).toHaveLength(1);
-    expect(dbOps.resources[0].from).toBe('steve@wisc.edu');
-    expect(dbOps.resources[0].to).toBe('park@wisc.edu');
+    expect(dbOps.resources[0].to).toBe('steve@wisc.edu');
+    expect(dbOps.resources[0].from).toBe('park@wisc.edu');
   });
 });

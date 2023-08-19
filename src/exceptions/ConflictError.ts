@@ -1,7 +1,6 @@
 /**
  * Define 409 Conflict Error based on HTTPError
- * Contains HTTP Status code and message for commonly caused
- *     400 Conflict Error
+ * Contains HTTP Status code and message for commonly caused 409 Conflict Error
  *
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  */
