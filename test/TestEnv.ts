@@ -73,7 +73,7 @@ export default class TestEnv {
         indexingMode: 'consistent',
         automatic: true,
         includedPaths: [{path: '/*'}],
-        excludedPaths: [{path: '/createdAt/?'}],
+        excludedPaths: [{path: '/since/?'}],
       },
     });
     /* istanbul ignore next */
