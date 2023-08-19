@@ -277,7 +277,7 @@ friendRouter.delete(
         throw new ForbiddenError();
       }
 
-      await FriendRequest.deleteReceived(dbClient, friendRequestId);
+      await FriendRequest.delete(dbClient, friendRequestId);
 
       res.status(200).send();
     } catch (e) {
