@@ -252,7 +252,7 @@ friendRouter.delete(
       }
 
       // Check access token
-      let tokenContents: AuthToken | undefined = undefined;
+      let tokenContents: AuthToken | undefined;
       const accessToken = req.header('X-ACCESS-TOKEN');
       if (accessToken !== undefined) {
         tokenContents = verifyAccessToken(
@@ -263,20 +263,20 @@ friendRouter.delete(
         throw new UnauthenticatedError();
       }
 
+      // Retrieve parameters
       const friendRequestId = req.params.friendRequestId;
       const userEmail = tokenContents.id;
 
       // DB Operation - get friend request to check if it belongs to the user
       const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
-
       if (friendRequest === undefined) {
         throw new NotFoundError();
       }
-
       if (friendRequest.to !== userEmail) {
         throw new ForbiddenError();
       }
 
+      // DB Operation - remove friend request
       await FriendRequest.delete(dbClient, friendRequestId);
 
       res.status(200).send();
