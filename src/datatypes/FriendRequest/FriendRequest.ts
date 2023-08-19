@@ -148,7 +148,7 @@ export default class FriendRequest {
     try {
       await dbClient.container(FRIEND_REQUEST).item(friendRequestId).delete();
     } catch (e) {
-      /* istanbul ignore else */
+      /* istanbul ignore next */
       if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
         throw new NotFoundError();
       } else {

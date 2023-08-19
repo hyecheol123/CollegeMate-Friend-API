@@ -269,9 +269,6 @@ friendRouter.delete(
 
       // DB Operation - get friend request to check if it belongs to the user
       const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
-      if (friendRequest === undefined) {
-        throw new NotFoundError();
-      }
       if (friendRequest.to !== userEmail) {
         throw new ForbiddenError();
       }

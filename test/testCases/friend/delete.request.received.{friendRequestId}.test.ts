@@ -2,7 +2,7 @@
  * Jest unit test for DELETE /friend/request/received/{friendRequestId} method
  *
  * @author Jeonghyeon Park <fishbox0923@gmail.com>
- *
+ * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  */
 
 // eslint-disable-next-line node/no-unpublished-import
@@ -14,19 +14,15 @@ import ExpressServer from '../../../src/ExpressServer';
 import AuthToken from '../../../src/datatypes/Token/AuthToken';
 import TestConfig from '../../../src/ServerConfig';
 
-describe('POST /friend/request - Send Friend Request', () => {
+describe('DELETE /friend/request/received/{friendRequestId} - Reject Friend Request', () => {
   const FRIENDREQUEST = 'friendRequest';
   const validFriendRequestId = TestConfig.hash(
-    'jeonghyeon@wisc.edu/steve@wisc.edu',
-    'jeonghyeon@wisc.edu',
+    `tedpowel123@wisc.edu/steve@wisc.edu/${new Date(
+      '2023-02-10T00:50:43.000Z'
+    ).toISOString()}`,
+    'tedpowel123@wisc.edu',
     'steve@wisc.edu'
   );
-  const invalidFriendRequestId = TestConfig.hash(
-    'invalid@wisc.edu/requestid@wisc.edu',
-    'invalid@wisc.edu',
-    'requestid@wisc.edu'
-  );
-  const notFoundId = 'notfoundId';
 
   let testEnv: TestEnv;
 
@@ -187,11 +183,34 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Fail - FriendRequestId not Belong to API', async () => {
+  test('Fail - FriendRequest is not for the user', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
-    const response = await request(testEnv.expressServer.app)
-      .delete(`/friend/request/received/${invalidFriendRequestId}`)
+    let response = await request(testEnv.expressServer.app)
+      .delete(
+        `/friend/request/received/${TestConfig.hash(
+          `park@wisc.edu/random@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'park@wisc.edu',
+          'random@wisc.edu'
+        )}`
+      )
+      .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(403);
+    expect(response.body.error).toBe('Forbidden');
+
+    response = await request(testEnv.expressServer.app)
+      .delete(
+        `/friend/request/received/${TestConfig.hash(
+          `steve@wisc.edu/dickdick@wisc.edu/${new Date(
+            '2023-02-10T00:50:43.000Z'
+          ).toISOString()}`,
+          'steve@wisc.edu',
+          'dickdick@wisc.edu'
+        )}`
+      )
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(403);
@@ -202,7 +221,13 @@ describe('POST /friend/request - Send Friend Request', () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     const response = await request(testEnv.expressServer.app)
-      .delete(`/friend/request/received/${notFoundId}`)
+      .delete(
+        `/friend/request/received/${TestConfig.hash(
+          'invalid@wisc.edu/requestid@wisc.edu',
+          'invalid@wisc.edu',
+          'requestid@wisc.edu'
+        )}`
+      )
       .set({'X-ACCESS-TOKEN': accessTokenMap.valid})
       .set({Origin: 'https://collegemate.app'});
     expect(response.status).toBe(404);
@@ -221,15 +246,24 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.status).toBe(200);
 
     // DB check read emails
-    const dbOps = await testEnv.dbClient
+    const dbOps1 = await testEnv.dbClient
       .container(FRIENDREQUEST)
-      .items.query('SELECT * FROM c')
+      .item(validFriendRequestId)
+      .read();
+    expect(dbOps1.statusCode).toBe(404);
+    expect(dbOps1.resource).toBeUndefined();
+    const dbOps2 = await testEnv.dbClient
+      .container(FRIENDREQUEST)
+      .items.query({
+        query:
+          'SELECT VALUE COUNT(fr.id) FROM friendRequest AS fr WHERE fr["from"]=@from AND fr.to=@to',
+        parameters: [
+          {name: '@from', value: 'tedpowel123@wisc.edu'},
+          {name: '@to', value: 'steve@wisc.edu'},
+        ],
+      })
       .fetchAll();
-
-    expect(dbOps.resources).toHaveLength(3);
-    expect(dbOps.resources[0].from).not.toBe('jeonghyeon@wisc.edu');
-    expect(dbOps.resources[1].from).not.toBe('jeonghyeon@wisc.edu');
-    expect(dbOps.resources[2].from).not.toBe('jeonghyeon@wisc.edu');
+    expect(dbOps2.resources[0]).toBe(0);
   });
 
   test('Success from App', async () => {
@@ -244,14 +278,23 @@ describe('POST /friend/request - Send Friend Request', () => {
     expect(response.status).toBe(200);
 
     // DB check read emails
-    const dbOps = await testEnv.dbClient
+    const dbOps1 = await testEnv.dbClient
       .container(FRIENDREQUEST)
-      .items.query('SELECT * FROM c')
+      .item(validFriendRequestId)
+      .read();
+    expect(dbOps1.statusCode).toBe(404);
+    expect(dbOps1.resource).toBeUndefined();
+    const dbOps2 = await testEnv.dbClient
+      .container(FRIENDREQUEST)
+      .items.query({
+        query:
+          'SELECT VALUE COUNT(fr.id) FROM friendRequest AS fr WHERE fr["from"]=@from AND fr.to=@to',
+        parameters: [
+          {name: '@from', value: 'tedpowel123@wisc.edu'},
+          {name: '@to', value: 'steve@wisc.edu'},
+        ],
+      })
       .fetchAll();
-
-    expect(dbOps.resources).toHaveLength(3);
-    expect(dbOps.resources[0].from).not.toBe('jeonghyeon@wisc.edu');
-    expect(dbOps.resources[1].from).not.toBe('jeonghyeon@wisc.edu');
-    expect(dbOps.resources[2].from).not.toBe('jeonghyeon@wisc.edu');
+    expect(dbOps2.resources[0]).toBe(0);
   });
 });
