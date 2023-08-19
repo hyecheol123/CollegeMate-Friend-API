@@ -15,6 +15,7 @@ import Friend from '../datatypes/Friend/Friend';
 import FriendRequest from '../datatypes/FriendRequest/FriendRequest';
 import FriendRequestGetResponseObj from '../datatypes/FriendRequest/FriendRequestGetResponseObj';
 import getUserProfile from '../datatypes/User/getUserProfile';
+import HTTPError from '../exceptions/HTTPError';
 import BadRequestError from '../exceptions/BadRequestError';
 import ForbiddenError from '../exceptions/ForbiddenError';
 import UnauthenticatedError from '../exceptions/UnauthenticatedError';
@@ -23,7 +24,6 @@ import ConflictError from '../exceptions/ConflictError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
-import HTTPError from '../exceptions/HTTPError';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -237,12 +237,51 @@ friendRouter.get('/request/received', async (req, res, next) => {
 });
 
 // DELETE: /friend/request/received/{friendRequestId}
-// friendRouter.delete(
-//   '/request/received/:friendRequestId',
-//   async (req, res, next) => {
-//     // TODO;
-//   }
-// );
+friendRouter.delete(
+  '/request/received/:friendRequestId',
+  async (req, res, next) => {
+    const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+    try {
+      // Check Origin header or application key
+      if (
+        req.header('Origin') !== req.app.get('webpageOrigin') &&
+        !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+      ) {
+        throw new ForbiddenError();
+      }
+
+      // Check access token
+      let tokenContents: AuthToken | undefined;
+      const accessToken = req.header('X-ACCESS-TOKEN');
+      if (accessToken !== undefined) {
+        tokenContents = verifyAccessToken(
+          accessToken,
+          req.app.get('jwtAccessKey')
+        );
+      } else {
+        throw new UnauthenticatedError();
+      }
+
+      // Retrieve parameters
+      const friendRequestId = req.params.friendRequestId;
+      const userEmail = tokenContents.id;
+
+      // DB Operation - get friend request to check if it belongs to the user
+      const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
+      if (friendRequest.to !== userEmail) {
+        throw new ForbiddenError();
+      }
+
+      // DB Operation - remove friend request
+      await FriendRequest.delete(dbClient, friendRequestId);
+
+      res.status(200).send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 // POST: /friend/request/received/{friendRequestId}/accept
 // friendRouter.post(

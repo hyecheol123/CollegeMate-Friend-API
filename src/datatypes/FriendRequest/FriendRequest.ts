@@ -6,6 +6,7 @@
  */
 
 import * as Cosmos from '@azure/cosmos';
+import NotFoundError from '../../exceptions/NotFoundError';
 
 const FRIEND_REQUEST = 'friendRequest';
 
@@ -34,6 +35,33 @@ export default class FriendRequest {
   ): Promise<void> {
     friendRequest.createdAt = (friendRequest.createdAt as Date).toISOString();
     await dbClient.container(FRIEND_REQUEST).items.create(friendRequest);
+  }
+
+  /**
+   * Read friend request and return friend request object
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} id id of friend request
+   *
+   * @return {Promise<FriendRequest>} friend request object
+   */
+  static async read(
+    dbClient: Cosmos.Database,
+    id: string
+  ): Promise<FriendRequest> {
+    const result = await dbClient
+      .container(FRIEND_REQUEST)
+      .item(id)
+      .read<FriendRequest>();
+    if (result.statusCode === 404 || result.resource === undefined) {
+      throw new NotFoundError();
+    }
+
+    return new FriendRequest(
+      result.resource.id,
+      result.resource.from,
+      result.resource.to,
+      new Date(result.resource.createdAt)
+    );
   }
 
   /**
@@ -105,5 +133,27 @@ export default class FriendRequest {
           .fetchAll()
       ).resources[0] > 0
     );
+  }
+
+  /**
+   * Delete existing friend request
+   *
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} friendRequestId friend request Id
+   */
+  static async delete(
+    dbClient: Cosmos.Database,
+    friendRequestId: string
+  ): Promise<void> {
+    try {
+      await dbClient.container(FRIEND_REQUEST).item(friendRequestId).delete();
+    } catch (e) {
+      /* istanbul ignore next */
+      if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
+        throw new NotFoundError();
+      } else {
+        throw e;
+      }
+    }
   }
 }
