@@ -267,7 +267,7 @@ friendRouter.delete(
       const friendRequestId = req.params.friendRequestId;
       const userEmail = tokenContents.id;
 
-      // DB Operation - get friend request to check if it belongs to the user
+      // DB Operation - get friend request to check if it is sent to the user
       const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
       if (friendRequest.to !== userEmail) {
         throw new ForbiddenError();
@@ -333,11 +333,50 @@ friendRouter.get('/request/sent', async (req, res, next) => {
 });
 
 // DELETE /friend/request/sent/{friendRequestId}
-// friendRouter.delete(
-//   '/request/sent/:friendRequestId',
-//   async (req, res, next) => {
-//     // TODO;
-//   }
-// );
+friendRouter.delete(
+  '/request/sent/:friendRequestId',
+  async (req, res, next) => {
+    const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+    try {
+      // Check Origin header or application key
+      if (
+        req.header('Origin') !== req.app.get('webpageOrigin') &&
+        !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+      ) {
+        throw new ForbiddenError();
+      }
+
+      // Check access token
+      let tokenContents: AuthToken | undefined;
+      const accessToken = req.header('X-ACCESS-TOKEN');
+      if (accessToken !== undefined) {
+        tokenContents = verifyAccessToken(
+          accessToken,
+          req.app.get('jwtAccessKey')
+        );
+      } else {
+        throw new UnauthenticatedError();
+      }
+
+      // Receive Parameters
+      const friendRequestId = req.params.friendRequestId;
+      const userEmail = tokenContents.id;
+
+      // DB Operation - get friend request to check if it sent by the user
+      const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
+      if (friendRequest.from !== userEmail) {
+        throw new ForbiddenError();
+      }
+
+      // DB Operation - remove friend request
+      await FriendRequest.delete(dbClient, friendRequestId);
+
+      res.status(200).send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 export default friendRouter;
