@@ -94,9 +94,15 @@ export default class Friend {
    * @param {string} id id of friend relationship
    */
   static async delete(dbClient: Cosmos.Database, id: string): Promise<void> {
-    const dbOps = await dbClient.container(FRIEND).item(id).delete();
-    if (dbOps.statusCode === 404) {
-      throw new NotFoundError();
+    try {
+      await dbClient.container(FRIEND).item(id).delete();
+    } catch (e) {
+      /* istanbul ignore else */
+      if (e instanceof Cosmos.ErrorResponse && e.code === 404) {
+        throw new NotFoundError();
+      } else {
+        throw e;
+      }
     }
   }
 }
