@@ -98,7 +98,10 @@ friendRouter.delete('/:base64Email', async (req, res, next) => {
 
     // DB Operation - delete requested friend
     const email = tokenContents.id;
-    await Friend.delete(dbClient, email, requestUserEmail);
+    const email1 = email < requestUserEmail ? email : requestUserEmail;
+    const email2 = email < requestUserEmail ? requestUserEmail : email;
+    const friendId = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
+    await Friend.delete(dbClient, friendId);
 
     res.status(200).send();
   } catch (e) {
@@ -320,9 +323,18 @@ friendRouter.post(
 
       // DB Operation - delete friend request and add friend
       await FriendRequest.delete(dbClient, friendRequestId);
+      const email1 =
+        friendRequest.from < friendRequest.to
+          ? friendRequest.from
+          : friendRequest.to;
+      const email2 =
+        friendRequest.from < friendRequest.to
+          ? friendRequest.to
+          : friendRequest.from;
+      const friendId = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
       await Friend.create(
         dbClient,
-        new Friend(friendRequest.from, friendRequest.to, new Date())
+        new Friend(friendId, email1, email2, new Date())
       );
 
       res.status(200).send();
