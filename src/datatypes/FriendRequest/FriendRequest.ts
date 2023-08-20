@@ -140,10 +140,14 @@ export default class FriendRequest {
    *
    * @param {Cosmos.Database} dbClient Cosmos DB Client
    * @param {string} friendRequestId friend request Id
+   * @param {string} email1 email of requested user or friend
+   * @param {string} email2 email of requested user or friend
    */
   static async delete(
     dbClient: Cosmos.Database,
-    friendRequestId: string
+    friendRequestId: string,
+    email1: string,
+    email2: string
   ): Promise<void> {
     try {
       await dbClient.container(FRIEND_REQUEST).item(friendRequestId).delete();
@@ -154,6 +158,26 @@ export default class FriendRequest {
       } else {
         throw e;
       }
+    }
+
+    // find and delete request with email1 and email2 if exists
+    const requestSent = await dbClient
+      .container(FRIEND_REQUEST)
+      .items.query({
+        query: `SELECT f.id FROM ${FRIEND_REQUEST} f WHERE f["from"]=@email1 AND f.to=@email2 OR f["from"]=@email2 AND f.to=@email1`,
+        parameters: [
+          {name: '@email1', value: email1},
+          {name: '@email2', value: email2},
+        ],
+      })
+      .fetchAll();
+
+    // TODO : check if I have to check and delete multiple requests if exists
+    if (requestSent.resources.length > 0) {
+      await dbClient
+        .container(FRIEND_REQUEST)
+        .item(requestSent.resources[0].id)
+        .delete();
     }
   }
 }

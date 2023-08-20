@@ -277,7 +277,12 @@ friendRouter.delete(
       }
 
       // DB Operation - remove friend request
-      await FriendRequest.delete(dbClient, friendRequestId);
+      await FriendRequest.delete(
+        dbClient,
+        friendRequestId,
+        friendRequest.to,
+        friendRequest.from
+      );
 
       res.status(200).send();
     } catch (e) {
@@ -311,7 +316,6 @@ friendRouter.post(
         req.app.get('jwtAccessKey')
       );
 
-      // Parameter check if received
       const friendRequestId = req.params.friendRequestId;
 
       // DB Operation - get friend request to check if it belongs to the user
@@ -322,7 +326,13 @@ friendRouter.post(
       }
 
       // DB Operation - delete friend request and add friend
-      await FriendRequest.delete(dbClient, friendRequestId);
+      await FriendRequest.delete(
+        dbClient,
+        friendRequestId,
+        friendRequest.to,
+        friendRequest.from
+      );
+
       const email1 =
         friendRequest.from < friendRequest.to
           ? friendRequest.from
@@ -332,6 +342,19 @@ friendRouter.post(
           ? friendRequest.to
           : friendRequest.from;
       const friendId = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
+
+      let friendRelation: Friend | undefined;
+      try {
+        friendRelation = await Friend.read(dbClient, friendId);
+      } catch (e) {
+        if ((e as HTTPError).statusCode !== 404) {
+          throw e;
+        }
+      }
+      if (friendRelation !== undefined) {
+        throw new ConflictError();
+      }
+
       await Friend.create(
         dbClient,
         new Friend(friendId, email1, email2, new Date())
@@ -423,7 +446,12 @@ friendRouter.delete(
       }
 
       // DB Operation - remove friend request
-      await FriendRequest.delete(dbClient, friendRequestId);
+      await FriendRequest.delete(
+        dbClient,
+        friendRequestId,
+        friendRequest.from,
+        friendRequest.to
+      );
 
       res.status(200).send();
     } catch (e) {
