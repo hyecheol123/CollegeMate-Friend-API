@@ -5,7 +5,7 @@
  * @author Hyecheol (Jerry) Jang <hyecheol123@gmail.com>
  */
 
-import HTTPError from '../exceptions/HTTPError';
+import HTTPError from './HTTPError';
 
 /**
  * Authentication Error is a type of HTTPError, of which status code is 404

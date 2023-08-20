@@ -93,8 +93,6 @@ export default class ExpressServer {
     });
   }
 
-  // TODO: Asyncronously set serverAdminToken
-
   /**
    * CLose Server
    * - Close connection with Database server gracefully
