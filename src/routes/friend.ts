@@ -279,9 +279,7 @@ friendRouter.delete(
       // DB Operation - remove friend request
       await FriendRequest.delete(
         dbClient,
-        friendRequestId,
-        friendRequest.to,
-        friendRequest.from
+        friendRequestId
       );
 
       res.status(200).send();
@@ -326,9 +324,8 @@ friendRouter.post(
       }
 
       // DB Operation - delete friend request and add friend
-      await FriendRequest.delete(
+      await FriendRequest.deleteAll(
         dbClient,
-        friendRequestId,
         friendRequest.to,
         friendRequest.from
       );
@@ -448,9 +445,7 @@ friendRouter.delete(
       // DB Operation - remove friend request
       await FriendRequest.delete(
         dbClient,
-        friendRequestId,
-        friendRequest.from,
-        friendRequest.to
+        friendRequestId
       );
 
       res.status(200).send();
