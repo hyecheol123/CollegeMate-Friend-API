@@ -143,7 +143,7 @@ export default class FriendRequest {
    */
   static async delete(
     dbClient: Cosmos.Database,
-    friendRequestId: string,
+    friendRequestId: string
   ): Promise<void> {
     try {
       await dbClient.container(FRIEND_REQUEST).item(friendRequestId).delete();
@@ -157,7 +157,6 @@ export default class FriendRequest {
     }
   }
 
-  
   /**
    * Delete all existing friend request
    *
@@ -182,11 +181,11 @@ export default class FriendRequest {
           ],
         })
         .fetchAll()
-      ).resources;
+    ).resources;
 
     if (requestSent.length > 0) {
       const operations: Cosmos.OperationInput[] = [];
-      requestSent.forEach((request) => {
+      requestSent.forEach(request => {
         operations.push({
           operationType: 'Delete',
           id: request.id,

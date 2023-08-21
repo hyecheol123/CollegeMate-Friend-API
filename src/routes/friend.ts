@@ -277,10 +277,7 @@ friendRouter.delete(
       }
 
       // DB Operation - remove friend request
-      await FriendRequest.delete(
-        dbClient,
-        friendRequestId
-      );
+      await FriendRequest.delete(dbClient, friendRequestId);
 
       res.status(200).send();
     } catch (e) {
@@ -443,10 +440,7 @@ friendRouter.delete(
       }
 
       // DB Operation - remove friend request
-      await FriendRequest.delete(
-        dbClient,
-        friendRequestId
-      );
+      await FriendRequest.delete(dbClient, friendRequestId);
 
       res.status(200).send();
     } catch (e) {
