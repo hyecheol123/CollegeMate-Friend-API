@@ -14,7 +14,7 @@ import AuthToken from '../../../src/datatypes/Token/AuthToken';
 import TestConfig from '../../../src/ServerConfig';
 import FriendRequest from '../../../src/datatypes/FriendRequest/FriendRequest';
 
-describe('DELETE /friend/request/received/{friendRequestId} - Reject Friend Request', () => {
+describe('POST /friend/request/received/{friendRequestId}/accept - Accept Friend Request', () => {
   const FRIEND_REQUEST = 'friendRequest';
   const FRIEND = 'friend';
 

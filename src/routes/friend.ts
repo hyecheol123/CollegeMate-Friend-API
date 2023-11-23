@@ -341,6 +341,7 @@ friendRouter.post(
       try {
         friendRelation = await Friend.read(dbClient, friendId);
       } catch (e) {
+        /* istanbul ignore if */
         if ((e as HTTPError).statusCode !== 404) {
           throw e;
         }

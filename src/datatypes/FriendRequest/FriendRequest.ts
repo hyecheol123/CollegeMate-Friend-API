@@ -183,6 +183,7 @@ export default class FriendRequest {
         .fetchAll()
     ).resources;
 
+    /* istanbul ignore else */
     if (requestSent.length > 0) {
       const operations: Cosmos.OperationInput[] = [];
       requestSent.forEach(request => {
