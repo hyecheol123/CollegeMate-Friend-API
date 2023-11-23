@@ -156,4 +156,46 @@ export default class FriendRequest {
       }
     }
   }
+
+  /**
+   * Delete all existing friend request
+   *
+   * @param {Cosmos.Database} dbClient Cosmos DB Client
+   * @param {string} email1 email of requested user or friend
+   * @param {string} email2 email of requested user or friend
+   */
+  static async deleteAll(
+    dbClient: Cosmos.Database,
+    email1: string,
+    email2: string
+  ): Promise<void> {
+    // find and delete request with email1 and email2 if exists
+    const requestSent = (
+      await dbClient
+        .container(FRIEND_REQUEST)
+        .items.query({
+          query: `SELECT f.id FROM ${FRIEND_REQUEST} f WHERE f["from"]=@email1 AND f.to=@email2 OR f["from"]=@email2 AND f.to=@email1`,
+          parameters: [
+            {name: '@email1', value: email1},
+            {name: '@email2', value: email2},
+          ],
+        })
+        .fetchAll()
+    ).resources;
+
+    /* istanbul ignore else */
+    if (requestSent.length > 0) {
+      const operations: Cosmos.OperationInput[] = [];
+      requestSent.forEach(request => {
+        operations.push({
+          operationType: 'Delete',
+          id: request.id,
+        });
+      });
+
+      await dbClient.container(FRIEND_REQUEST).items.bulk(operations);
+    } else {
+      throw new NotFoundError();
+    }
+  }
 }

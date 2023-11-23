@@ -15,7 +15,7 @@ import AuthToken from '../../../src/datatypes/Token/AuthToken';
 import TestConfig from '../../../src/ServerConfig';
 
 describe('DELETE /friend/request/received/{friendRequestId} - Reject Friend Request', () => {
-  const FRIENDREQUEST = 'friendRequest';
+  const FRIEND_REQUEST = 'friendRequest';
   const validFriendRequestId = TestConfig.hash(
     `tedpowel123@wisc.edu/steve@wisc.edu/${new Date(
       '2023-02-10T00:50:43.000Z'
@@ -247,13 +247,13 @@ describe('DELETE /friend/request/received/{friendRequestId} - Reject Friend Requ
 
     // DB check read emails
     const dbOps1 = await testEnv.dbClient
-      .container(FRIENDREQUEST)
+      .container(FRIEND_REQUEST)
       .item(validFriendRequestId)
       .read();
     expect(dbOps1.statusCode).toBe(404);
     expect(dbOps1.resource).toBeUndefined();
     const dbOps2 = await testEnv.dbClient
-      .container(FRIENDREQUEST)
+      .container(FRIEND_REQUEST)
       .items.query({
         query:
           'SELECT VALUE COUNT(fr.id) FROM friendRequest AS fr WHERE fr["from"]=@from AND fr.to=@to',
@@ -279,13 +279,13 @@ describe('DELETE /friend/request/received/{friendRequestId} - Reject Friend Requ
 
     // DB check read emails
     const dbOps1 = await testEnv.dbClient
-      .container(FRIENDREQUEST)
+      .container(FRIEND_REQUEST)
       .item(validFriendRequestId)
       .read();
     expect(dbOps1.statusCode).toBe(404);
     expect(dbOps1.resource).toBeUndefined();
     const dbOps2 = await testEnv.dbClient
-      .container(FRIENDREQUEST)
+      .container(FRIEND_REQUEST)
       .items.query({
         query:
           'SELECT VALUE COUNT(fr.id) FROM friendRequest AS fr WHERE fr["from"]=@from AND fr.to=@to',

@@ -98,7 +98,10 @@ friendRouter.delete('/:base64Email', async (req, res, next) => {
 
     // DB Operation - delete requested friend
     const email = tokenContents.id;
-    await Friend.delete(dbClient, email, requestUserEmail);
+    const email1 = email < requestUserEmail ? email : requestUserEmail;
+    const email2 = email < requestUserEmail ? requestUserEmail : email;
+    const friendId = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
+    await Friend.delete(dbClient, friendId);
 
     res.status(200).send();
   } catch (e) {
@@ -284,12 +287,80 @@ friendRouter.delete(
 );
 
 // POST: /friend/request/received/{friendRequestId}/accept
-// friendRouter.post(
-//   '/request/received/:friendRequestId/accept',
-//   async (req, res, next) => {
-//     // TODO;
-//   }
-// );
+friendRouter.post(
+  '/request/received/:friendRequestId/accept',
+  async (req, res, next) => {
+    const dbClient: Cosmos.Database = req.app.locals.dbClient;
+
+    try {
+      // Check Origin header or application key
+      if (
+        req.header('Origin') !== req.app.get('webpageOrigin') &&
+        !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
+      ) {
+        throw new ForbiddenError();
+      }
+
+      // Header check - access token
+      const accessToken = req.header('X-ACCESS-TOKEN');
+      if (accessToken === undefined) {
+        throw new UnauthenticatedError();
+      }
+      const tokenContents = verifyAccessToken(
+        accessToken,
+        req.app.get('jwtAccessKey')
+      );
+
+      const friendRequestId = req.params.friendRequestId;
+
+      // DB Operation - get friend request to check if it belongs to the user
+      const friendRequest = await FriendRequest.read(dbClient, friendRequestId);
+
+      if (friendRequest.to !== tokenContents.id) {
+        throw new ForbiddenError();
+      }
+
+      // DB Operation - delete friend request and add friend
+      await FriendRequest.deleteAll(
+        dbClient,
+        friendRequest.to,
+        friendRequest.from
+      );
+
+      const email1 =
+        friendRequest.from < friendRequest.to
+          ? friendRequest.from
+          : friendRequest.to;
+      const email2 =
+        friendRequest.from < friendRequest.to
+          ? friendRequest.to
+          : friendRequest.from;
+      const friendId = ServerConfig.hash(`${email1}/${email2}`, email1, email2);
+
+      let friendRelation: Friend | undefined;
+      try {
+        friendRelation = await Friend.read(dbClient, friendId);
+      } catch (e) {
+        /* istanbul ignore if */
+        if ((e as HTTPError).statusCode !== 404) {
+          throw e;
+        }
+      }
+      if (friendRelation !== undefined) {
+        throw new ConflictError();
+      }
+
+      await Friend.create(
+        dbClient,
+        new Friend(friendId, email1, email2, new Date())
+      );
+
+      res.status(200).send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 // GET: /friend/request/sent
 friendRouter.get('/request/sent', async (req, res, next) => {
