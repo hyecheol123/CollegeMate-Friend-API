@@ -24,6 +24,7 @@ import ConflictError from '../exceptions/ConflictError';
 import verifyAccessToken from '../functions/JWT/verifyAccessToken';
 import {validateSendFriendRequest} from '../functions/inputValidator/validateSendFriendRequest';
 import {validateEmail} from '../functions/inputValidator/validateEmail';
+import verifyServerAdminToken from '../functions/JWT/verifyServerAdminToken';
 
 // Path: /friend
 const friendRouter = express.Router();
@@ -33,26 +34,45 @@ friendRouter.get('/', async (req, res, next) => {
   const dbClient: Cosmos.Database = req.app.locals.dbClient;
 
   try {
-    // Check Origin header or application key
+    // Header check - access token or Origin header or application key
+    const serverToken = req.header('X-SERVER-TOKEN');
     if (
+      serverToken === undefined &&
       req.header('Origin') !== req.app.get('webpageOrigin') &&
       !req.app.get('applicationKey').includes(req.header('X-APPLICATION-KEY'))
     ) {
       throw new ForbiddenError();
     }
-
-    // Header check - access token
+    
+    // Check server admin token or access token - which is provided
+    let tokenContents: AuthToken | undefined = undefined;
     const accessToken = req.header('X-ACCESS-TOKEN');
-    if (accessToken === undefined) {
+    let email = '';
+    if (serverToken !== undefined) {
+      verifyServerAdminToken(serverToken, req.app.get('jwtAccessKey'));
+      // If Admin token doesn't have request body
+      if (req.body.email === undefined) {
+        throw new NotFoundError();
+      }
+      email = req.body.email;
+      if (!validateEmail(email)) {
+        throw new NotFoundError();
+      }
+    } else if (accessToken !== undefined) {
+      // If Access token has request body
+      if (req.body.email !== undefined) {
+        throw new BadRequestError();
+      }
+      tokenContents = verifyAccessToken(
+        accessToken,
+        req.app.get('jwtAccessKey')
+      );
+      email = tokenContents.id;
+    } else {
       throw new UnauthenticatedError();
     }
-    const tokenContents = verifyAccessToken(
-      accessToken,
-      req.app.get('jwtAccessKey')
-    );
 
     // DB Operation - get list of friends
-    const email = tokenContents.id;
     const friendListResponseObj: {friendList: string[]} = {
       friendList: await Friend.readFriendEmailList(dbClient, email),
     };
