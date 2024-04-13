@@ -183,30 +183,7 @@ describe('GET /friend - Friend List', () => {
     expect(response.body.error).toBe('Forbidden');
   });
 
-  test('Fail - AdminToken without Request Body', async() => {
-    testEnv.expressServer = testEnv.expressServer as ExpressServer;
-
-      // Generate admin token
-      const tokenContent: AuthToken = {
-      id: 'testAdmin',
-      type: 'access',
-      tokenType: 'serverAdmin',
-      accountType: 'admin',
-    };
-    const adminToken = jwt.sign(tokenContent, testEnv.testConfig.jwt.secretKey, {
-      algorithm: 'HS512',
-      expiresIn: '60m',
-    });
-
-    const response = await request(testEnv.expressServer.app)
-      .get('/friend')
-      .set({'X-SERVER-TOKEN': adminToken})
-      .set({Origin: 'https://collegemate.app'})
-    expect(response.status).toBe(404);
-    expect(response.body.error).toBe('Not Found');
-  });
-
-  test('Fail - AdminToken with invalid email in Request Body', async() => {
+  test('Fail - AdminToken without Request Body', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     // Generate admin token
@@ -216,10 +193,41 @@ describe('GET /friend - Friend List', () => {
       tokenType: 'serverAdmin',
       accountType: 'admin',
     };
-    const adminToken = jwt.sign(tokenContent, testEnv.testConfig.jwt.secretKey, {
-      algorithm: 'HS512',
-      expiresIn: '60m',
-    });
+    const adminToken = jwt.sign(
+      tokenContent,
+      testEnv.testConfig.jwt.secretKey,
+      {
+        algorithm: 'HS512',
+        expiresIn: '60m',
+      }
+    );
+
+    const response = await request(testEnv.expressServer.app)
+      .get('/friend')
+      .set({'X-SERVER-TOKEN': adminToken})
+      .set({Origin: 'https://collegemate.app'});
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Not Found');
+  });
+
+  test('Fail - AdminToken with invalid email in Request Body', async () => {
+    testEnv.expressServer = testEnv.expressServer as ExpressServer;
+
+    // Generate admin token
+    const tokenContent: AuthToken = {
+      id: 'testAdmin',
+      type: 'access',
+      tokenType: 'serverAdmin',
+      accountType: 'admin',
+    };
+    const adminToken = jwt.sign(
+      tokenContent,
+      testEnv.testConfig.jwt.secretKey,
+      {
+        algorithm: 'HS512',
+        expiresIn: '60m',
+      }
+    );
 
     const response = await request(testEnv.expressServer.app)
       .get('/friend')
@@ -230,7 +238,7 @@ describe('GET /friend - Friend List', () => {
     expect(response.body.error).toBe('Not Found');
   });
 
-  test('Fail - Access Token with Request Body', async() => {
+  test('Fail - Access Token with Request Body', async () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
 
     const response = await request(testEnv.expressServer.app)
@@ -276,8 +284,8 @@ describe('GET /friend - Friend List', () => {
     testEnv.expressServer = testEnv.expressServer as ExpressServer;
     testEnv.dbClient = testEnv.dbClient as Cosmos.Database;
 
-     // Generate admin token
-     const tokenContent: AuthToken = {
+    // Generate admin token
+    const tokenContent: AuthToken = {
       id: 'testAdmin',
       type: 'access',
       tokenType: 'serverAdmin',

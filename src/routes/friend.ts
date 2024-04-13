@@ -43,7 +43,7 @@ friendRouter.get('/', async (req, res, next) => {
     ) {
       throw new ForbiddenError();
     }
-    
+
     // Check server admin token or access token - which is provided
     let tokenContents: AuthToken | undefined = undefined;
     const accessToken = req.header('X-ACCESS-TOKEN');
