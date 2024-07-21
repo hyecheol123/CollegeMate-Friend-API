@@ -52,11 +52,11 @@ friendRouter.get('/', async (req, res, next) => {
       verifyServerAdminToken(serverToken, req.app.get('jwtAccessKey'));
       // If Admin token doesn't have request body
       if (req.body.email === undefined) {
-        throw new NotFoundError();
+        throw new BadRequestError();
       }
       email = req.body.email;
       if (!validateEmail(email)) {
-        throw new NotFoundError();
+        throw new BadRequestError();
       }
     } else if (accessToken !== undefined) {
       // If Access token has request body

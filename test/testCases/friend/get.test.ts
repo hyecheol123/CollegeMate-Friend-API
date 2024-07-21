@@ -206,8 +206,8 @@ describe('GET /friend - Friend List', () => {
       .get('/friend')
       .set({'X-SERVER-TOKEN': adminToken})
       .set({Origin: 'https://collegemate.app'});
-    expect(response.status).toBe(404);
-    expect(response.body.error).toBe('Not Found');
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Bad Request');
   });
 
   test('Fail - AdminToken with invalid email in Request Body', async () => {
@@ -234,8 +234,8 @@ describe('GET /friend - Friend List', () => {
       .set({'X-SERVER-TOKEN': adminToken})
       .set({Origin: 'https://collegemate.app'})
       .send({email: '123'});
-    expect(response.status).toBe(404);
-    expect(response.body.error).toBe('Not Found');
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Bad Request');
   });
 
   test('Fail - Access Token with Request Body', async () => {
